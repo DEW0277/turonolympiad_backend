@@ -1,0 +1,88 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+
+# Environment variables
+.env
+.env.*
+*.env
+
+# Logs
+*.log
+logs/
+
+# SQLite database files
+*.sqlite3
+*.db
+
+# Pytest
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# Mypy
+.mypy_cache/
+
+# PyCharm
+.idea/
+
+# VS Code
+.vscode/
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# Docker
+*.pid
+docker-compose.override.yml
+
+# Local development
+*.local
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# Temporary files
+*.swp
+*.swo
+*~
+
+#alembic 
+alembic/versions/*.py
+alembic/versions/*.pyc
+alembic /__pycache__/
+alembic*
+alembic*
