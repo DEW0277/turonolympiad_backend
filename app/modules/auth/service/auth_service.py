@@ -1,7 +1,8 @@
 from datetime import datetime, timedelta, timezone
 from email import message
 import email
-from fastapi import HTTPException, status
+from typing import Optional
+from fastapi import HTTPException, logger, status
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -81,7 +82,7 @@ class AuthService:
        
         hashed_password = self._hash_password(user['password'])
         new_user = await self.auth_repository.create_user(user['phone_number'], hashed_password, user['first_name'], user['last_name'])
-        await self.login_user(new_user.phone_number, user['password'])
+        return await self.login_user(new_user.phone_number, user['password'])
 
 
     async def login_user(self, phone: str, password: str):
@@ -102,7 +103,6 @@ class AuthService:
             },
             status_code=status.HTTP_200_OK
         )
-
 
         response.set_cookie(
             key="refresh_token",
@@ -141,10 +141,40 @@ class AuthService:
         )
 
 
-    async def logout_user(self):
+    async def logout_user(self, access_token: Optional[str] = None):
         response = JSONResponse(
             content={"message": "Logged out successfully"},
             status_code=status.HTTP_200_OK
         )
-        response.delete_cookie("refresh_token")
+        
+        response.delete_cookie(
+            key="refresh_token",
+            path="/",
+            secure=True,
+            httponly=True,
+            samesite="lax"
+        )
+        
+        if access_token:
+            try:
+                payload = jwt.decode(
+                    access_token, 
+                    SECRET_KEY, 
+                    algorithms=[ALGORITHM],
+                    options={"verify_exp": False}
+                )
+                
+
+                exp = payload.get("exp")
+                if exp:
+                    now = datetime.now(timezone.utc).timestamp()
+                    ttl = int(exp - now)
+                    
+                    if ttl > 0:
+                        await self._blacklist_token(access_token, ttl)
+                        logger.info(f"Access token blacklisted for user: {payload.get('sub')}")
+                    
+            except (PyJWTError, TypeError, ValueError) as e:
+                logger.warning(f"Could not blacklist invalid token: {str(e)}")
+        
         return response

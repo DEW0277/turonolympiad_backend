@@ -13,8 +13,8 @@ class UserRegister(UserBase):
     otp: int
 
 
-
-class UserLogin(UserBase):
+class UserLogin(BaseModel):
+    phone_number: str
     password: str
     
 
