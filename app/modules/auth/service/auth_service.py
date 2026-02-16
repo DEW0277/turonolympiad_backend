@@ -1,8 +1,9 @@
 from datetime import datetime, timedelta, timezone
 from email import message
 import email
+import logging
 from typing import Optional
-from fastapi import HTTPException, logger, status
+from fastapi import HTTPException, status
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -14,6 +15,8 @@ from app.modules.auth.service.otp_service import OtpService
 from app.modules.redis import redis_service
 import jwt
 from jwt import PyJWTError
+
+logger = logging.getLogger(__name__)
 
 
 class AuthService:
@@ -41,11 +44,19 @@ class AuthService:
         token = jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
         return token
 
+    async def _blacklist_token(self, token: str, ttl: int):
+        """Blacklist a token in Redis (if available)"""
+        try:
+            await redis_service.set_key(f"blacklist:{token}", "true", ttl=ttl)
+        except Exception:
+            # Redis not available - token will still expire naturally
+            pass
+
 
     async def get_current_user(self, token: str):
         try:
             payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-            user_id = int(payload.get("sub"))
+            user_id = payload.get("sub")  # user_id is already a string UUID
         except (PyJWTError, TypeError, ValueError):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -91,6 +102,13 @@ class AuthService:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid phone or password"
+            )
+
+        # Check if user is active
+        if not user.is_active:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Your account has been deactivated. Contact support for more information."
             )
 
         access_token = self._create_access_token(user.id)

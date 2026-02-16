@@ -5,6 +5,7 @@ from app.middlewares.log_middleware import LoggingMiddleware
 
 from app.modules.telegram.router import router
 from app.modules.auth.api.auth_route import router as auth_router
+from app.modules.auth.api.admin_route import router as admin_router
 from app.dependencies.current_user import get_current_user
 
 
@@ -33,6 +34,11 @@ app.include_router(
 )
 
 app.include_router(
+    router=admin_router,
+    tags=["admin"]
+)
+
+app.include_router(
     router=router,
     tags=["telegram"]
 )
@@ -43,6 +49,12 @@ app.include_router(
 async def root(current_user=Depends(get_current_user)):
     return {
         "message": "Welcome to the Test API!",
+        "user": {
+            "id": current_user.id,
+            "first_name": current_user.first_name,
+            "last_name": current_user.last_name,
+            "role": current_user.role.value if hasattr(current_user.role, 'value') else current_user.role
+        },
         "documentations":{
             "docs": "/docs",
             "redoc": "/redoc",
