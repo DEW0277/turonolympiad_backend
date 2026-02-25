@@ -1,16 +1,18 @@
-annotated-doc==0.0.4
-annotated-types==0.7.0
-anyio==4.12.1
-asyncpg==0.31.0
-click==8.3.1
-fastapi==0.129.0
-greenlet==3.3.1
-h11==0.16.0
-idna==3.11
-pydantic==2.12.5
-pydantic_core==2.41.5
-SQLAlchemy==2.0.46
-starlette==0.52.1
-typing-inspection==0.4.2
-typing_extensions==4.15.0
-uvicorn==0.40.0
+# Core Dependencies
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+python-jose[cryptography]>=3.3.0
+passlib[bcrypt]>=1.7.4
+python-multipart>=0.0.6
+pydantic[email]>=2.4.0
+pydantic-settings>=2.0.3
+sqlalchemy>=2.0.0
+aiosqlite>=0.19.0
+aiosmtplib>=3.0.0
+
+# Development Dependencies
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
+pytest-cov>=4.1.0
+hypothesis>=6.88.0
+httpx>=0.25.0
