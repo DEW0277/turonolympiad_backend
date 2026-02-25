@@ -106,7 +106,6 @@ async def general_exception_handler(request: Request, exc: Exception) -> JSONRes
 
 # Include routers
 app.include_router(auth.router)
-app.include_router(welcome.router)
 
 
 @app.get("/health")
