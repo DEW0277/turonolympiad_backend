@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - User Management</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+    </style>
+</head>
+<body class="bg-white text-gray-900">
+    <div class="flex h-screen bg-white">
+        <!-- Sidebar Navigation -->
+        <aside class="w-64 bg-gray-50 border-r border-gray-200 flex flex-col">
+            <!-- Sidebar Header -->
+            <div class="p-6 border-b border-gray-200">
+                <h1 class="text-xl font-bold text-gray-900">Admin Panel</h1>
+                <p class="text-sm text-gray-500 mt-1">User Management</p>
+            </div>
+
+            <!-- Navigation Menu -->
+            <nav class="flex-1 px-4 py-6 space-y-2">
+                <!-- Users Section (Active) -->
+                <div class="space-y-1">
+                    <h3 class="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                        Management
+                    </h3>
+                    <a href="#" class="block px-3 py-2 rounded-md text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 transition-colors" data-nav="users">
+                        <span class="inline-block mr-2">👥</span>Users
+                    </a>
+                </div>
+
+                <!-- Future Features Placeholder -->
+                <div class="space-y-1 pt-4">
+                    <h3 class="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                        Coming Soon
+                    </h3>
+                    <button class="w-full text-left px-3 py-2 rounded-md text-sm text-gray-500 cursor-not-allowed opacity-50" disabled>
+                        <span class="inline-block mr-2">📊</span>Analytics
+                    </button>
+                    <button class="w-full text-left px-3 py-2 rounded-md text-sm text-gray-500 cursor-not-allowed opacity-50" disabled>
+                        <span class="inline-block mr-2">⚙️</span>Settings
+                    </button>
+                </div>
+            </nav>
+
+            <!-- Sidebar Footer -->
+            <div class="p-4 border-t border-gray-200">
+                <button class="w-full px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-gray-100 transition-colors text-left" data-action="logout">
+                    <span class="inline-block mr-2">🚪</span>Logout
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 flex flex-col overflow-hidden">
+            <!-- Header -->
+            <header class="bg-white border-b border-gray-200 px-8 py-4 flex items-center justify-between">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-900">User Management</h2>
+                    <p class="text-sm text-gray-500 mt-1">Manage platform users and permissions</p>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="text-right">
+                        <p class="text-sm font-medium text-gray-900" id="current-user-email">Loading...</p>
+                        <p class="text-xs text-gray-500">Administrator</p>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <div class="flex-1 overflow-auto">
+                <div class="p-8">
+                    <!-- Search and Filter Controls -->
+                    <div class="mb-6 bg-white rounded-lg border border-gray-200 p-4">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <!-- Search Input -->
+                            <div>
+                                <label for="search-input" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Search by Email
+                                </label>
+                                <input
+                                    type="text"
+                                    id="search-input"
+                                    placeholder="Enter email to search..."
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    data-action="search"
+                                >
+                            </div>
+
+                            <!-- Verification Filter -->
+                            <div>
+                                <label for="verified-filter" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Verification Status
+                                </label>
+                                <select
+                                    id="verified-filter"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    data-action="filter"
+                                >
+                                    <option value="">All Users</option>
+                                    <option value="true">Verified Only</option>
+                                    <option value="false">Unverified Only</option>
+                                </select>
+                            </div>
+
+                            <!-- Create User Button -->
+                            <div class="flex items-end">
+                                <button
+                                    class="w-full px-4 py-2 bg-blue-500 text-white rounded-md text-sm font-medium hover:bg-blue-600 transition-colors"
+                                    data-action="create-user"
+                                >
+                                    + Create User
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Loading State -->
+                    <div id="loading-state" class="text-center py-12">
+                        <div class="inline-block">
+                            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                        </div>
+                        <p class="text-gray-500 mt-4">Loading users...</p>
+                    </div>
+
+                    <!-- Error State -->
+                    <div id="error-state" class="hidden bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+                        <p class="text-red-800 text-sm" id="error-message"></p>
+                    </div>
+
+                    <!-- User Table -->
+                    <div id="table-container" class="hidden bg-white rounded-lg border border-gray-200 overflow-hidden">
+                        <table class="w-full">
+                            <thead class="bg-gray-50 border-b border-gray-200">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">ID</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Email</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Verified</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Admin</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Created</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="users-table-body" class="divide-y divide-gray-200">
+                                <!-- Users will be inserted here -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div id="empty-state" class="hidden text-center py-12 bg-white rounded-lg border border-gray-200">
+                        <p class="text-gray-500 text-sm">No users found</p>
+                    </div>
+
+                    <!-- Pagination Controls -->
+                    <div id="pagination-container" class="hidden mt-6 flex items-center justify-between bg-white rounded-lg border border-gray-200 p-4">
+                        <div class="text-sm text-gray-600">
+                            Showing <span id="page-start">0</span>-<span id="page-end">0</span> of <span id="total-count">0</span> users
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <button
+                                id="prev-page-btn"
+                                class="px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                data-action="prev-page"
+                            >
+                                ← Previous
+                            </button>
+                            <div class="flex items-center space-x-2">
+                                <label for="page-size" class="text-sm text-gray-600">Per page:</label>
+                                <select
+                                    id="page-size"
+                                    class="px-2 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    data-action="page-size"
+                                >
+                                    <option value="10">10</option>
+                                    <option value="25" selected>25</option>
+                                    <option value="50">50</option>
+                                    <option value="100">100</option>
+                                </select>
+                            </div>
+                            <button
+                                id="next-page-btn"
+                                class="px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                data-action="next-page"
+                            >
+                                Next →
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Create User Modal -->
+    <div id="create-user-modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+            <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+                <h3 class="text-lg font-semibold text-gray-900">Create New User</h3>
+                <button class="text-gray-400 hover:text-gray-600" data-action="close-modal" data-modal="create-user-modal">
+                    ✕
+                </button>
+            </div>
+            <form id="create-user-form" class="p-6 space-y-4">
+                <div>
+                    <label for="create-email" class="block text-sm font-medium text-gray-700 mb-1">
+                        Email Address
+                    </label>
+                    <input
+                        type="email"
+                        id="create-email"
+                        name="email"
+                        required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="user@example.com"
+                    >
+                </div>
+                <div>
+                    <label for="create-password" class="block text-sm font-medium text-gray-700 mb-1">
+                        Password
+                    </label>
+                    <input
+                        type="password"
+                        id="create-password"
+                        name="password"
+                        required
+                        minlength="8"
+                        maxlength="100"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="Minimum 8 characters"
+                    >
+                    <p class="text-xs text-gray-500 mt-1">Must be at least 8 characters</p>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <label class="flex items-center">
+                        <input
+                            type="checkbox"
+                            id="create-verified"
+                            name="is_verified"
+                            class="w-4 h-4 text-blue-500 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                        >
+                        <span class="ml-2 text-sm text-gray-700">Mark as Verified</span>
+                    </label>
+                    <label class="flex items-center">
+                        <input
+                            type="checkbox"
+                            id="create-admin"
+                            name="is_admin"
+                            class="w-4 h-4 text-blue-500 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                        >
+                        <span class="ml-2 text-sm text-gray-700">Admin User</span>
+                    </label>
+                </div>
+                <div class="flex space-x-3 pt-4">
+                    <button
+                        type="button"
+                        class="flex-1 px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                        data-action="close-modal"
+                        data-modal="create-user-modal"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        type="submit"
+                        class="flex-1 px-4 py-2 bg-blue-500 text-white rounded-md text-sm font-medium hover:bg-blue-600 transition-colors"
+                    >
+                        Create User
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit User Modal -->
+    <div id="edit-user-modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+            <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+                <h3 class="text-lg font-semibold text-gray-900">Edit User</h3>
+                <button class="text-gray-400 hover:text-gray-600" data-action="close-modal" data-modal="edit-user-modal">
+                    ✕
+                </button>
+            </div>
+            <form id="edit-user-form" class="p-6 space-y-4">
+                <input type="hidden" id="edit-user-id" name="user_id">
+                <div>
+                    <label for="edit-email" class="block text-sm font-medium text-gray-700 mb-1">
+                        Email Address
+                    </label>
+                    <input
+                        type="email"
+                        id="edit-email"
+                        name="email"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="user@example.com"
+                    >
+                </div>
+                <div>
+                    <label for="edit-password" class="block text-sm font-medium text-gray-700 mb-1">
+                        Password (leave blank to keep current)
+                    </label>
+                    <input
+                        type="password"
+                        id="edit-password"
+                        name="password"
+                        minlength="8"
+                        maxlength="100"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="Leave blank to keep current password"
+                    >
+                    <p class="text-xs text-gray-500 mt-1">Must be at least 8 characters if provided</p>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <label class="flex items-center">
+                        <input
+                            type="checkbox"
+                            id="edit-verified"
+                            name="is_verified"
+                            class="w-4 h-4 text-blue-500 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                        >
+                        <span class="ml-2 text-sm text-gray-700">Verified</span>
+                    </label>
+                    <label class="flex items-center">
+                        <input
+                            type="checkbox"
+                            id="edit-admin"
+                            name="is_admin"
+                            class="w-4 h-4 text-blue-500 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                        >
+                        <span class="ml-2 text-sm text-gray-700">Admin User</span>
+                    </label>
+                </div>
+                <div class="flex space-x-3 pt-4">
+                    <button
+                        type="button"
+                        class="flex-1 px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                        data-action="close-modal"
+                        data-modal="edit-user-modal"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        type="submit"
+                        class="flex-1 px-4 py-2 bg-blue-500 text-white rounded-md text-sm font-medium hover:bg-blue-600 transition-colors"
+                    >
+                        Update User
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="delete-user-modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-900">Delete User</h3>
+            </div>
+            <div class="p-6">
+                <p class="text-gray-700 mb-2">Are you sure you want to delete this user?</p>
+                <p class="text-sm text-gray-500 mb-4">
+                    <strong id="delete-user-email"></strong>
+                </p>
+                <p class="text-sm text-red-600 mb-6">This action cannot be undone.</p>
+                <div class="flex space-x-3">
+                    <button
+                        type="button"
+                        class="flex-1 px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                        data-action="close-modal"
+                        data-modal="delete-user-modal"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        type="button"
+                        class="flex-1 px-4 py-2 bg-red-500 text-white rounded-md text-sm font-medium hover:bg-red-600 transition-colors"
+                        data-action="confirm-delete"
+                    >
+                        Delete User
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed top-4 right-4 space-y-2 z-40 pointer-events-none"></div>
+
+    <!-- JavaScript for interactivity -->
+    <script>
+        // ============================================================================
+        // API CLIENT MODULE
+        // ============================================================================
+        
+        const ApiClient = {
+            baseUrl: '/api/admin',
+            
+            async request(endpoint, options = {}) {
+                const url = `${this.baseUrl}${endpoint}`;
+                const config = {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...options.headers
+                    },
+                    credentials: 'include',
+                    ...options
+                };
+                
+                try {
+                    const response = await fetch(url, config);
+                    const data = await response.json();
+                    
+                    if (!response.ok) {
+                        throw {
+                            status: response.status,
+                            data: data
+                        };
+                    }
+                    
+                    return data;
+                } catch (error) {
+                    throw error;
+                }
+            },
+            
+            async getUsers(skip = 0, limit = 25, search = '', verifiedOnly = null) {
+                const params = new URLSearchParams();
+                params.append('skip', skip);
+                params.append('limit', limit);
+                if (search) params.append('search', search);
+                if (verifiedOnly !== null) params.append('verified_only', verifiedOnly);
+                
+                return this.request(`/users?${params.toString()}`);
+            },
+            
+            async createUser(email, password, isVerified = false, isAdmin = false) {
+                return this.request('/users', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        email,
+                        password,
+                        is_verified: isVerified,
+                        is_admin: isAdmin
+                    })
+                });
+            },
+            
+            async updateUser(userId, updates) {
+                return this.request(`/users/${userId}`, {
+                    method: 'PUT',
+                    body: JSON.stringify(updates)
+                });
+            },
+            
+            async deleteUser(userId) {
+                return this.request(`/users/${userId}`, {
+                    method: 'DELETE'
+                });
+            },
+            
+            async toggleVerification(userId) {
+                return this.request(`/users/${userId}/verify`, {
+                    method: 'PATCH'
+                });
+            }
+        };
+
+        // ============================================================================
+        // STATE MANAGEMENT
+        // ============================================================================
+        
+        const state = {
+            currentPage: 0,
+            pageSize: 25,
+            searchQuery: '',
+            verifiedFilter: null,
+            totalUsers: 0,
+            users: [],
+            deleteUserId: null,
+            currentUserEmail: null,
+            isLoading: false
+        };
+
+        // ============================================================================
+        // UI UTILITIES
+        // ============================================================================
+        
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.remove('hidden');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+        }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            const bgColor = {
+                success: 'bg-green-500',
+                error: 'bg-red-500',
+                info: 'bg-blue-500'
+            }[type] || 'bg-blue-500';
+
+            toast.className = `${bgColor} text-white px-4 py-3 rounded-md shadow-lg text-sm pointer-events-auto`;
+            toast.textContent = message;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        function showLoading() {
+            document.getElementById('loading-state').classList.remove('hidden');
+            document.getElementById('table-container').classList.add('hidden');
+            document.getElementById('empty-state').classList.add('hidden');
+            document.getElementById('error-state').classList.add('hidden');
+            document.getElementById('pagination-container').classList.add('hidden');
+        }
+
+        function hideLoading() {
+            document.getElementById('loading-state').classList.add('hidden');
+        }
+
+        function showError(message) {
+            hideLoading();
+            document.getElementById('error-message').textContent = message;
+            document.getElementById('error-state').classList.remove('hidden');
+            document.getElementById('table-container').classList.add('hidden');
+            document.getElementById('empty-state').classList.add('hidden');
+            document.getElementById('pagination-container').classList.add('hidden');
+        }
+
+        function showEmpty() {
+            hideLoading();
+            document.getElementById('error-state').classList.add('hidden');
+            document.getElementById('table-container').classList.add('hidden');
+            document.getElementById('empty-state').classList.remove('hidden');
+            document.getElementById('pagination-container').classList.add('hidden');
+        }
+
+        function showTable() {
+            hideLoading();
+            document.getElementById('error-state').classList.add('hidden');
+            document.getElementById('empty-state').classList.add('hidden');
+            document.getElementById('table-container').classList.remove('hidden');
+            document.getElementById('pagination-container').classList.remove('hidden');
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+        }
+
+        function parseError(error) {
+            if (error.data && error.data.detail) {
+                if (typeof error.data.detail === 'string') {
+                    return error.data.detail;
+                }
+                if (Array.isArray(error.data.detail)) {
+                    return error.data.detail.map(e => `${e.loc.join('.')}: ${e.msg}`).join(', ');
+                }
+            }
+            return 'An error occurred';
+        }
+
+        // ============================================================================
+        // USER LIST LOADING AND DISPLAY
+        // ============================================================================
+        
+        async function loadUsers() {
+            showLoading();
+            
+            try {
+                const verifiedOnly = state.verifiedFilter === '' ? null : 
+                                    state.verifiedFilter === 'true' ? true :
+                                    state.verifiedFilter === 'false' ? false : null;
+                
+                const response = await ApiClient.getUsers(
+                    state.currentPage * state.pageSize,
+                    state.pageSize,
+                    state.searchQuery,
+                    verifiedOnly
+                );
+                
+                state.users = response.users;
+                state.totalUsers = response.total;
+                
+                if (state.users.length === 0) {
+                    showEmpty();
+                } else {
+                    renderUserTable();
+                    updatePagination();
+                    showTable();
+                }
+            } catch (error) {
+                showError(parseError(error));
+            }
+        }
+
+        function renderUserTable() {
+            const tbody = document.getElementById('users-table-body');
+            tbody.innerHTML = '';
+            
+            state.users.forEach(user => {
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50 transition-colors';
+                
+                const verifiedBadge = user.is_verified 
+                    ? '<span class="inline-block px-2 py-1 bg-green-100 text-green-800 text-xs rounded">Verified</span>'
+                    : '<span class="inline-block px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded">Unverified</span>';
+                
+                const adminBadge = user.is_admin
+                    ? '<span class="inline-block px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">Admin</span>'
+                    : '';
+                
+                row.innerHTML = `
+                    <td class="px-6 py-4 text-sm text-gray-900">${user.id}</td>
+                    <td class="px-6 py-4 text-sm text-gray-900">${user.email}</td>
+                    <td class="px-6 py-4 text-sm">${verifiedBadge}</td>
+                    <td class="px-6 py-4 text-sm">${adminBadge}</td>
+                    <td class="px-6 py-4 text-sm text-gray-500">${formatDate(user.created_at)}</td>
+                    <td class="px-6 py-4 text-sm space-x-2">
+                        <button class="px-2 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600 transition-colors" data-action="edit-user" data-user-id="${user.id}">
+                            Edit
+                        </button>
+                        <button class="px-2 py-1 bg-yellow-500 text-white rounded text-xs hover:bg-yellow-600 transition-colors" data-action="toggle-verify" data-user-id="${user.id}">
+                            ${user.is_verified ? 'Unverify' : 'Verify'}
+                        </button>
+                        <button class="px-2 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-600 transition-colors" data-action="delete-user" data-user-id="${user.id}">
+                            Delete
+                        </button>
+                    </td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+        }
+
+        function updatePagination() {
+            const start = state.currentPage * state.pageSize + 1;
+            const end = Math.min((state.currentPage + 1) * state.pageSize, state.totalUsers);
+            
+            document.getElementById('page-start').textContent = state.totalUsers === 0 ? 0 : start;
+            document.getElementById('page-end').textContent = end;
+            document.getElementById('total-count').textContent = state.totalUsers;
+            
+            const prevBtn = document.getElementById('prev-page-btn');
+            const nextBtn = document.getElementById('next-page-btn');
+            
+            prevBtn.disabled = state.currentPage === 0;
+            nextBtn.disabled = end >= state.totalUsers;
+        }
+
+        // ============================================================================
+        // SEARCH AND FILTER FUNCTIONALITY
+        // ============================================================================
+        
+        let searchTimeout;
+        
+        function debounceSearch(callback, delay = 300) {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(callback, delay);
+        }
+
+        document.getElementById('search-input').addEventListener('input', (e) => {
+            state.searchQuery = e.target.value;
+            state.currentPage = 0;
+            debounceSearch(() => loadUsers());
+        });
+
+        document.getElementById('verified-filter').addEventListener('change', (e) => {
+            state.verifiedFilter = e.target.value;
+            state.currentPage = 0;
+            loadUsers();
+        });
+
+        // ============================================================================
+        // PAGINATION CONTROLS
+        // ============================================================================
+        
+        document.getElementById('page-size').addEventListener('change', (e) => {
+            state.pageSize = parseInt(e.target.value);
+            state.currentPage = 0;
+            loadUsers();
+        });
+
+        document.getElementById('prev-page-btn').addEventListener('click', () => {
+            if (state.currentPage > 0) {
+                state.currentPage--;
+                loadUsers();
+            }
+        });
+
+        document.getElementById('next-page-btn').addEventListener('click', () => {
+            const maxPage = Math.ceil(state.totalUsers / state.pageSize) - 1;
+            if (state.currentPage < maxPage) {
+                state.currentPage++;
+                loadUsers();
+            }
+        });
+
+        // ============================================================================
+        // USER CREATION FLOW
+        // ============================================================================
+        
+        document.addEventListener('click', (e) => {
+            if (e.target.dataset.action === 'create-user') {
+                document.getElementById('create-user-form').reset();
+                openModal('create-user-modal');
+            }
+        });
+
+        document.getElementById('create-user-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('create-email').value.trim();
+            const password = document.getElementById('create-password').value;
+            const isVerified = document.getElementById('create-verified').checked;
+            const isAdmin = document.getElementById('create-admin').checked;
+            
+            if (!email || !password) {
+                showToast('Please fill in all required fields', 'error');
+                return;
+            }
+            
+            if (password.length < 8) {
+                showToast('Password must be at least 8 characters', 'error');
+                return;
+            }
+            
+            try {
+                await ApiClient.createUser(email, password, isVerified, isAdmin);
+                closeModal('create-user-modal');
+                showToast('User created successfully', 'success');
+                state.currentPage = 0;
+                loadUsers();
+            } catch (error) {
+                showToast(parseError(error), 'error');
+            }
+        });
+
+        // ============================================================================
+        // USER EDIT FLOW
+        // ============================================================================
+        
+        document.addEventListener('click', async (e) => {
+            if (e.target.dataset.action === 'edit-user') {
+                const userId = parseInt(e.target.dataset.userId);
+                const user = state.users.find(u => u.id === userId);
+                
+                if (user) {
+                    document.getElementById('edit-user-id').value = user.id;
+                    document.getElementById('edit-email').value = user.email;
+                    document.getElementById('edit-password').value = '';
+                    document.getElementById('edit-verified').checked = user.is_verified;
+                    document.getElementById('edit-admin').checked = user.is_admin;
+                    openModal('edit-user-modal');
+                }
+            }
+        });
+
+        document.getElementById('edit-user-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const userId = parseInt(document.getElementById('edit-user-id').value);
+            const email = document.getElementById('edit-email').value.trim();
+            const password = document.getElementById('edit-password').value;
+            const isVerified = document.getElementById('edit-verified').checked;
+            const isAdmin = document.getElementById('edit-admin').checked;
+            
+            if (!email) {
+                showToast('Email is required', 'error');
+                return;
+            }
+            
+            if (password && password.length < 8) {
+                showToast('Password must be at least 8 characters', 'error');
+                return;
+            }
+            
+            const updates = {
+                email: email,
+                is_verified: isVerified,
+                is_admin: isAdmin
+            };
+            
+            if (password) {
+                updates.password = password;
+            }
+            
+            try {
+                await ApiClient.updateUser(userId, updates);
+                closeModal('edit-user-modal');
+                showToast('User updated successfully', 'success');
+                loadUsers();
+            } catch (error) {
+                showToast(parseError(error), 'error');
+            }
+        });
+
+        // ============================================================================
+        // USER DELETION FLOW
+        // ============================================================================
+        
+        document.addEventListener('click', (e) => {
+            if (e.target.dataset.action === 'delete-user') {
+                const userId = parseInt(e.target.dataset.userId);
+                const user = state.users.find(u => u.id === userId);
+                
+                if (user) {
+                    state.deleteUserId = userId;
+                    document.getElementById('delete-user-email').textContent = user.email;
+                    openModal('delete-user-modal');
+                }
+            }
+        });
+
+        document.addEventListener('click', async (e) => {
+            if (e.target.dataset.action === 'confirm-delete') {
+                if (state.deleteUserId === null) return;
+                
+                try {
+                    await ApiClient.deleteUser(state.deleteUserId);
+                    closeModal('delete-user-modal');
+                    showToast('User deleted successfully', 'success');
+                    state.deleteUserId = null;
+                    loadUsers();
+                } catch (error) {
+                    showToast(parseError(error), 'error');
+                }
+            }
+        });
+
+        // ============================================================================
+        // VERIFICATION TOGGLE
+        // ============================================================================
+        
+        document.addEventListener('click', async (e) => {
+            if (e.target.dataset.action === 'toggle-verify') {
+                const userId = parseInt(e.target.dataset.userId);
+                
+                try {
+                    await ApiClient.toggleVerification(userId);
+                    showToast('Verification status updated', 'success');
+                    loadUsers();
+                } catch (error) {
+                    showToast(parseError(error), 'error');
+                }
+            }
+        });
+
+        // ============================================================================
+        // MODAL CONTROLS
+        // ============================================================================
+        
+        document.addEventListener('click', (e) => {
+            if (e.target.dataset.action === 'close-modal') {
+                const modalId = e.target.dataset.modal;
+                closeModal(modalId);
+            }
+        });
+
+        // ============================================================================
+        // LOGOUT
+        // ============================================================================
+        
+        document.addEventListener('click', (e) => {
+            if (e.target.dataset.action === 'logout') {
+                window.location.href = '/api/auth/logout';
+            }
+        });
+
+        // ============================================================================
+        // INITIALIZATION
+        // ============================================================================
+        
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                // Load current user email
+                const response = await fetch('/api/auth/me', {
+                    credentials: 'include'
+                });
+                
+                if (response.ok) {
+                    const user = await response.json();
+                    state.currentUserEmail = user.email;
+                    document.getElementById('current-user-email').textContent = user.email;
+                } else {
+                    document.getElementById('current-user-email').textContent = 'Admin';
+                }
+            } catch (error) {
+                document.getElementById('current-user-email').textContent = 'Admin';
+            }
+            
+            // Load initial user list
+            loadUsers();
+        });
+    </script>
+</body>
+</html>

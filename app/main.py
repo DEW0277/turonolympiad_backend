@@ -7,16 +7,23 @@ middleware, exception handlers, and configuration.
 
 import logging
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Request
+from pathlib import Path
+from typing import Annotated
+
+from fastapi import FastAPI, Request, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
 
 from app.api import auth
+from app.api import admin
 from app.api import welcome
+from app.api.deps import get_current_admin_user
 from app.core.exceptions import AuthException
+from app.exceptions import ApplicationError
 from app.database import init_db
 from app.i18n.language import detect_language
 from app.i18n.translations import TranslationManager
+from app.models.user import User
 
 # Configure logging
 logging.basicConfig(
@@ -92,6 +99,21 @@ async def auth_exception_handler(request: Request, exc: AuthException) -> JSONRe
     )
 
 
+@app.exception_handler(ApplicationError)
+async def application_error_handler(request: Request, exc: ApplicationError) -> JSONResponse:
+    """Handle application exceptions."""
+    # Log based on severity
+    if exc.status_code >= 500:
+        logger.error(f"{exc.__class__.__name__}: {exc.message}", exc_info=True)
+    elif exc.status_code >= 400:
+        logger.warning(f"{exc.__class__.__name__}: {exc.message}")
+    
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.message}
+    )
+
+
 @app.exception_handler(Exception)
 async def general_exception_handler(request: Request, exc: Exception) -> JSONResponse:
     """Handle unexpected exceptions."""
@@ -106,6 +128,38 @@ async def general_exception_handler(request: Request, exc: Exception) -> JSONRes
 
 # Include routers
 app.include_router(auth.router)
+app.include_router(admin.router)
+
+# Add admin panel route (GET /admin)
+@app.get("/admin", include_in_schema=False)
+async def serve_admin_panel(
+    current_admin: Annotated[User, Depends(get_current_admin_user)] = None,
+) -> FileResponse:
+    """
+    Serve the admin panel HTML interface.
+    
+    Returns the admin panel HTML file for authenticated admin users.
+    The admin panel provides a web-based interface for managing platform users.
+    
+    **Requirements:**
+    - 1.1: Serve admin panel HTML interface at /admin
+    - 1.2: Redirect non-authenticated users to login with 401
+    - 1.3: Deny non-admin users with 403
+    - 1.4: Display professional interface with minimal color palette
+    - 1.5: Display navigation sidebar with extensible structure
+    - 9.1: Non-admin users cannot access
+    - 9.2: Unauthenticated users cannot access
+    - 9.3: Verify admin status from database
+    """
+    # Get the path to the admin HTML file
+    admin_html_path = Path(__file__).parent / "static" / "admin" / "index.html"
+    
+    # Serve the HTML file with proper content-type
+    return FileResponse(
+        path=admin_html_path,
+        media_type="text/html",
+        status_code=200
+    )
 
 
 @app.get("/health")
