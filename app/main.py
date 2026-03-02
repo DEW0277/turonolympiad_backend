@@ -12,13 +12,14 @@ from typing import Annotated
 
 from fastapi import FastAPI, Request, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, FileResponse
+from fastapi.responses import JSONResponse, FileResponse, RedirectResponse
+from fastapi.staticfiles import StaticFiles
 
 from app.api import auth
 from app.api import admin
-from app.api import welcome
+
 from app.api.deps import get_current_admin_user
-from app.core.exceptions import AuthException
+from app.core.exceptions import AuthException, AuthenticationError, AuthorizationError
 from app.exceptions import ApplicationError
 from app.database import init_db
 from app.i18n.language import detect_language
@@ -59,6 +60,9 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+# Mount static files
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
+
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
@@ -81,6 +85,56 @@ async def add_security_headers(request: Request, call_next):
 
 
 # Exception handlers
+@app.exception_handler(AuthenticationError)
+async def authentication_error_handler(request: Request, exc: AuthenticationError):
+    """Handle authentication errors."""
+    # Log the error
+    logger.warning(f"{exc.__class__.__name__}: {exc.message}")
+    
+    # For /admin paths, serve login.html
+    if request.url.path.startswith("/admin"):
+        admin_html_path = Path(__file__).parent / "static" / "admin" / "login.html"
+        return FileResponse(
+            path=admin_html_path,
+            media_type="text/html",
+            status_code=401
+        )
+    
+    # For other paths, return JSON
+    language = detect_language(request.headers.get("accept-language"))
+    localized_message = translations.get(exc.message, language)
+    
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": localized_message}
+    )
+
+
+@app.exception_handler(AuthorizationError)
+async def authorization_error_handler(request: Request, exc: AuthorizationError):
+    """Handle authorization errors."""
+    # Log the error
+    logger.warning(f"{exc.__class__.__name__}: {exc.message}")
+    
+    # For /admin paths, serve 403.html
+    if request.url.path.startswith("/admin"):
+        admin_html_path = Path(__file__).parent / "static" / "admin" / "403.html"
+        return FileResponse(
+            path=admin_html_path,
+            media_type="text/html",
+            status_code=403
+        )
+    
+    # For other paths, return JSON
+    language = detect_language(request.headers.get("accept-language"))
+    localized_message = translations.get(exc.message, language)
+    
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": localized_message}
+    )
+
+
 @app.exception_handler(AuthException)
 async def auth_exception_handler(request: Request, exc: AuthException) -> JSONResponse:
     """Handle authentication module exceptions."""
@@ -100,13 +154,22 @@ async def auth_exception_handler(request: Request, exc: AuthException) -> JSONRe
 
 
 @app.exception_handler(ApplicationError)
-async def application_error_handler(request: Request, exc: ApplicationError) -> JSONResponse:
+async def application_error_handler(request: Request, exc: ApplicationError):
     """Handle application exceptions."""
     # Log based on severity
     if exc.status_code >= 500:
         logger.error(f"{exc.__class__.__name__}: {exc.message}", exc_info=True)
     elif exc.status_code >= 400:
         logger.warning(f"{exc.__class__.__name__}: {exc.message}")
+    
+    # For /admin paths with 500 errors, serve 500.html
+    if request.url.path.startswith("/admin") and exc.status_code >= 500:
+        admin_html_path = Path(__file__).parent / "static" / "admin" / "500.html"
+        return FileResponse(
+            path=admin_html_path,
+            media_type="text/html",
+            status_code=exc.status_code
+        )
     
     return JSONResponse(
         status_code=exc.status_code,
@@ -115,10 +178,19 @@ async def application_error_handler(request: Request, exc: ApplicationError) -> 
 
 
 @app.exception_handler(Exception)
-async def general_exception_handler(request: Request, exc: Exception) -> JSONResponse:
+async def general_exception_handler(request: Request, exc: Exception):
     """Handle unexpected exceptions."""
     logger.error(f"Unexpected error: {str(exc)}", exc_info=True)
     language = detect_language(request.headers.get("accept-language"))
+    
+    # For /admin paths, serve 500.html
+    if request.url.path.startswith("/admin"):
+        admin_html_path = Path(__file__).parent / "static" / "admin" / "500.html"
+        return FileResponse(
+            path=admin_html_path,
+            media_type="text/html",
+            status_code=500
+        )
     
     return JSONResponse(
         status_code=500,
@@ -129,6 +201,60 @@ async def general_exception_handler(request: Request, exc: Exception) -> JSONRes
 # Include routers
 app.include_router(auth.router)
 app.include_router(admin.router)
+
+# Add login page route (GET /admin/login)
+@app.get("/admin/login", include_in_schema=False)
+async def serve_login_page() -> FileResponse:
+    """
+    Serve the admin login page.
+    
+    Returns the login HTML file for unauthenticated users.
+    """
+    admin_html_path = Path(__file__).parent / "static" / "admin" / "login.html"
+    
+    return FileResponse(
+        path=admin_html_path,
+        media_type="text/html",
+        status_code=200
+    )
+
+
+# Add error page routes
+@app.get("/admin/404", include_in_schema=False)
+async def serve_404_page() -> FileResponse:
+    """Serve the 404 error page."""
+    admin_html_path = Path(__file__).parent / "static" / "admin" / "404.html"
+    
+    return FileResponse(
+        path=admin_html_path,
+        media_type="text/html",
+        status_code=404
+    )
+
+
+@app.get("/admin/500", include_in_schema=False)
+async def serve_500_page() -> FileResponse:
+    """Serve the 500 error page."""
+    admin_html_path = Path(__file__).parent / "static" / "admin" / "500.html"
+    
+    return FileResponse(
+        path=admin_html_path,
+        media_type="text/html",
+        status_code=500
+    )
+
+
+@app.get("/admin/403", include_in_schema=False)
+async def serve_403_page() -> FileResponse:
+    """Serve the 403 error page."""
+    admin_html_path = Path(__file__).parent / "static" / "admin" / "403.html"
+    
+    return FileResponse(
+        path=admin_html_path,
+        media_type="text/html",
+        status_code=403
+    )
+
 
 # Add admin panel route (GET /admin)
 @app.get("/admin", include_in_schema=False)
@@ -166,6 +292,25 @@ async def serve_admin_panel(
 async def health_check():
     """Health check endpoint."""
     return {"status": "healthy"}
+
+
+# Add 404 handler for unmatched /admin routes
+@app.api_route("/{path_name:path}", methods=["GET"], include_in_schema=False)
+async def catch_all_admin_routes(path_name: str, request: Request):
+    """Catch unmatched routes starting with /admin and serve 404.html."""
+    if path_name.startswith("admin"):
+        admin_html_path = Path(__file__).parent / "static" / "admin" / "404.html"
+        return FileResponse(
+            path=admin_html_path,
+            media_type="text/html",
+            status_code=404
+        )
+    
+    # For non-admin paths, return JSON 404
+    return JSONResponse(
+        status_code=404,
+        content={"detail": "Not found"}
+    )
 
 
 if __name__ == "__main__":

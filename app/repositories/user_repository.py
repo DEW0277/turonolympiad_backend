@@ -126,13 +126,14 @@ class UserRepository(BaseRepository[User]):
         skip: int = 0,
         limit: int = 50,
         search: Optional[str] = None,
-        verified_only: Optional[bool] = None
+        verified_only: Optional[bool] = None,
+        is_admin: Optional[bool] = None
     ) -> tuple[list[User], int]:
         """Fetch paginated users with optional filters.
         
-        Retrieves a paginated list of users with optional email search and
-        verification status filtering. Results are ordered by created_at
-        descending (newest first).
+        Retrieves a paginated list of users with optional email search,
+        verification status filtering, and admin status filtering. Results are 
+        ordered by created_at descending (newest first).
         
         Preconditions:
             - skip >= 0 (non-negative offset)
@@ -148,12 +149,14 @@ class UserRepository(BaseRepository[User]):
             - No passwords are included in response
             - If search provided, all returned users have email matching pattern
             - If verified_only provided, all returned users match verification status
+            - If is_admin provided, all returned users match admin status
         
         Args:
             skip: Number of records to skip for pagination (default: 0)
             limit: Maximum number of records to return (default: 50, max: 100)
             search: Optional email search pattern for partial match (case-insensitive)
             verified_only: Optional filter by verification status (True/False/None)
+            is_admin: Optional filter by admin status (True/False/None)
             
         Returns:
             Tuple of (users, total_count) where users is a list of User instances
@@ -176,6 +179,11 @@ class UserRepository(BaseRepository[User]):
         if verified_only is not None:
             query = query.where(User.is_verified == verified_only)
             count_query = count_query.where(User.is_verified == verified_only)
+        
+        # Apply admin status filter if provided
+        if is_admin is not None:
+            query = query.where(User.is_admin == is_admin)
+            count_query = count_query.where(User.is_admin == is_admin)
         
         # Get total count of matching records
         total_result = await self.db.execute(count_query)

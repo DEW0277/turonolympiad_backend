@@ -116,13 +116,15 @@ class UserListQueryParams(BaseModel):
     """
     Query parameters for user list endpoint.
     
-    Supports pagination, email search filtering, and verification status filtering.
+    Supports pagination, email search filtering, verification status filtering,
+    and admin status filtering.
     
     Attributes:
         skip: Number of records to skip for pagination (default: 0)
         limit: Maximum number of records to return (default: 50, max: 100)
         search: Optional email search filter (case-insensitive partial match)
         verified_only: Optional filter for verification status
+        is_admin: Optional filter for admin status
     """
     skip: int = Field(
         default=0,
@@ -142,6 +144,10 @@ class UserListQueryParams(BaseModel):
     verified_only: Optional[bool] = Field(
         default=None,
         description="Filter by verification status (True/False/None)"
+    )
+    is_admin: Optional[bool] = Field(
+        default=None,
+        description="Filter by admin status (True/False/None)"
     )
     
     model_config = ConfigDict(

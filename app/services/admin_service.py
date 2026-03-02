@@ -59,13 +59,14 @@ class AdminService:
         skip: int = 0,
         limit: int = 50,
         search: Optional[str] = None,
-        verified_only: Optional[bool] = None
+        verified_only: Optional[bool] = None,
+        is_admin: Optional[bool] = None
     ) -> tuple[list[User], int]:
         """Retrieve paginated list of users with optional filtering.
         
         Fetches users from the database with pagination support and optional
-        filtering by email search pattern and verification status. Results are
-        ordered by created_at in descending order (newest first).
+        filtering by email search pattern, verification status, and admin status.
+        Results are ordered by created_at in descending order (newest first).
         
         Args:
             skip: Number of records to skip for pagination (default: 0)
@@ -75,6 +76,10 @@ class AdminService:
                 - True: return only verified users
                 - False: return only unverified users
                 - None: return all users regardless of verification status
+            is_admin: Optional filter for admin status
+                - True: return only admin users
+                - False: return only non-admin users
+                - None: return all users regardless of admin status
             
         Returns:
             Tuple of (user_list, total_count) where:
@@ -120,6 +125,11 @@ class AdminService:
         if verified_only is not None:
             query = query.where(User.is_verified == verified_only)
             count_query = count_query.where(User.is_verified == verified_only)
+        
+        # Apply admin status filter if provided
+        if is_admin is not None:
+            query = query.where(User.is_admin == is_admin)
+            count_query = count_query.where(User.is_admin == is_admin)
         
         # Get total count matching filters
         total_result = await db.execute(count_query)

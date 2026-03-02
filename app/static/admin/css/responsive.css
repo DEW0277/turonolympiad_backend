@@ -1,0 +1,218 @@
+/**
+ * Responsive Design Styles
+ * Mobile-first approach for better responsiveness
+ */
+
+/* Custom scrollbar styling */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Mobile Styles (default) */
+@media (max-width: 768px) {
+    /* Sidebar becomes collapsible */
+    aside {
+        position: fixed;
+        left: 0;
+        top: 0;
+        height: 100vh;
+        z-index: 40;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+    }
+
+    aside.open {
+        transform: translateX(0);
+    }
+
+    /* Main content takes full width on mobile */
+    main {
+        width: 100%;
+    }
+
+    /* Adjust header */
+    header {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    header > div:first-child {
+        width: 100%;
+    }
+
+    header > div:last-child {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    /* Adjust grid layout for filters */
+    .grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* Stack buttons vertically on mobile */
+    .space-x-2 {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .space-x-2 button {
+        width: 100%;
+    }
+
+    /* Adjust table for mobile */
+    table {
+        font-size: 0.75rem;
+    }
+
+    table th,
+    table td {
+        padding: 0.5rem !important;
+    }
+
+    /* Hide some columns on very small screens */
+    @media (max-width: 480px) {
+        table th:nth-child(4),
+        table td:nth-child(4),
+        table th:nth-child(5),
+        table td:nth-child(5) {
+            display: none;
+        }
+    }
+
+    /* Adjust modal width */
+    .max-w-md {
+        max-width: 90vw !important;
+    }
+
+    /* Adjust pagination controls */
+    #pagination-container {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    #pagination-container > div:first-child {
+        width: 100%;
+        text-align: center;
+    }
+
+    #pagination-container > div:last-child {
+        width: 100%;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+}
+
+/* Tablet Styles */
+@media (min-width: 769px) and (max-width: 1024px) {
+    aside {
+        width: 200px;
+    }
+
+    .grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+
+    table {
+        font-size: 0.875rem;
+    }
+}
+
+/* Desktop Styles */
+@media (min-width: 1025px) {
+    aside {
+        width: 256px;
+    }
+
+    .grid {
+        grid-template-columns: repeat(4, 1fr) !important;
+    }
+
+    table {
+        font-size: 0.875rem;
+    }
+}
+
+/* Utility Classes */
+.hidden {
+    display: none !important;
+}
+
+.flex {
+    display: flex;
+}
+
+.flex-col {
+    flex-direction: column;
+}
+
+.gap-2 {
+    gap: 0.5rem;
+}
+
+.gap-4 {
+    gap: 1rem;
+}
+
+.space-x-2 > * + * {
+    margin-left: 0.5rem;
+}
+
+.space-y-2 > * + * {
+    margin-top: 0.5rem;
+}
+
+/* Smooth transitions */
+* {
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+button {
+    cursor: pointer;
+}
+
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Focus states for accessibility */
+button:focus,
+input:focus,
+select:focus {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+}
+
+/* Print styles */
+@media print {
+    aside,
+    header,
+    #pagination-container,
+    .space-x-2 {
+        display: none;
+    }
+
+    body {
+        background: white;
+    }
+
+    table {
+        width: 100%;
+    }
+}

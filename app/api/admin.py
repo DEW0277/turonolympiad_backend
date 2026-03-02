@@ -8,7 +8,7 @@ require admin authentication via the get_current_admin_user dependency.
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_admin_user
@@ -74,24 +74,27 @@ router = APIRouter(prefix="/api/admin", tags=["admin"])
     },
 )
 async def list_users(
-    skip: int = 0,
-    limit: int = 50,
-    search: str | None = None,
-    verified_only: bool | None = None,
+    skip: int = Query(0, ge=0, description="Number of records to skip"),
+    limit: int = Query(50, ge=1, le=100, description="Maximum records to return"),
+    search: str | None = Query(None, description="Email search filter"),
+    verified_only: bool | None = Query(None, description="Filter by verification status"),
+    is_admin: bool | None = Query(None, description="Filter by admin status"),
     current_admin: Annotated[User, Depends(get_current_admin_user)] = None,
     db: AsyncSession = Depends(get_db),
 ) -> UserListResponse:
     """
     List all users with pagination and filtering.
     
-    Retrieves a paginated list of users with optional email search and
-    verification status filtering. Results are ordered by created_at descending.
+    Retrieves a paginated list of users with optional email search,
+    verification status filtering, and admin status filtering. Results are 
+    ordered by created_at descending.
     
     **Query Parameters:**
     - skip: Number of records to skip (default: 0, must be >= 0)
     - limit: Maximum records to return (default: 50, must be 1-100)
     - search: Email search filter (case-insensitive partial match, optional)
     - verified_only: Filter by verification status (True/False/None, optional)
+    - is_admin: Filter by admin status (True/False/None, optional)
     
     **Requirements:**
     - 2.1: Return paginated users with total count
@@ -114,41 +117,31 @@ async def list_users(
     - 9.2: Unauthenticated users cannot access
     - 9.3: Verify admin status from database
     """
-    try:
-        # Validate pagination parameters
-        if skip < 0:
-            raise ValueError("skip must be >= 0")
-        if limit < 1 or limit > 100:
-            raise ValueError("limit must be between 1 and 100")
-        
-        # Treat empty search string as no search
-        if search is not None and len(search.strip()) == 0:
-            search = None
-        
-        # Create service and fetch users
-        user_repo = UserRepository(db)
-        admin_service = AdminService(user_repo, PasswordService())
-        
-        users, total = await admin_service.get_all_users(
-            skip=skip,
-            limit=limit,
-            search=search,
-            verified_only=verified_only
-        )
-        
-        # Convert to response schema
-        user_responses = [AdminUserResponse.model_validate(user) for user in users]
-        
-        return UserListResponse(
-            users=user_responses,
-            total=total,
-            skip=skip,
-            limit=limit
-        )
-        
-    except ValueError as e:
-        # Validation error
-        raise ValueError(str(e))
+    # Treat empty search string as no search
+    if search is not None and len(search.strip()) == 0:
+        search = None
+    
+    # Create service and fetch users
+    user_repo = UserRepository(db)
+    admin_service = AdminService(user_repo, PasswordService())
+    
+    users, total = await admin_service.get_all_users(
+        skip=skip,
+        limit=limit,
+        search=search,
+        verified_only=verified_only,
+        is_admin=is_admin
+    )
+    
+    # Convert to response schema
+    user_responses = [AdminUserResponse.model_validate(user) for user in users]
+    
+    return UserListResponse(
+        users=user_responses,
+        total=total,
+        skip=skip,
+        limit=limit
+    )
 
 
 @router.get(
@@ -192,16 +185,12 @@ async def get_user(
     - 9.2: Unauthenticated users cannot access
     - 9.3: Verify admin status from database
     """
-    try:
-        user_repo = UserRepository(db)
-        admin_service = AdminService(user_repo, PasswordService())
-        
-        user = await admin_service.get_user_by_id(user_id)
-        
-        return AdminUserResponse.model_validate(user)
-        
-    except ResourceNotFoundError as e:
-        raise ResourceNotFoundError(str(e))
+    user_repo = UserRepository(db)
+    admin_service = AdminService(user_repo, PasswordService())
+    
+    user = await admin_service.get_user_by_id(user_id)
+    
+    return AdminUserResponse.model_validate(user)
 
 
 @router.post(
@@ -263,11 +252,14 @@ async def create_user(
     - 10.3: Validate required fields
     - 12.1: Enforce email uniqueness
     """
+    from app.services.audit_service import AuditService
+    
+    user_repo = UserRepository(db)
+    password_service = PasswordService()
+    admin_service = AdminService(user_repo, password_service)
+    audit_service = AuditService(db)
+    
     try:
-        user_repo = UserRepository(db)
-        password_service = PasswordService()
-        admin_service = AdminService(user_repo, password_service)
-        
         user = await admin_service.create_user(
             email=request.email,
             password=request.password,
@@ -275,13 +267,34 @@ async def create_user(
             is_admin=request.is_admin
         )
         
+        # Log successful action
+        await audit_service.log_user_creation(
+            admin_id=current_admin.id,
+            admin_email=current_admin.email,
+            target_user_id=user.id,
+            target_user_email=user.email,
+            success=True
+        )
+        
+        await db.commit()
+        
         return AdminActionResponse(
             message="User created successfully",
             user=AdminUserResponse.model_validate(user)
         )
-        
-    except EmailAlreadyExistsError as e:
-        raise EmailAlreadyExistsError(str(e))
+    except Exception as e:
+        await db.rollback()
+        # Log failed action
+        await audit_service.log_user_creation(
+            admin_id=current_admin.id,
+            admin_email=current_admin.email,
+            target_user_id=0,
+            target_user_email=request.email,
+            success=False,
+            details=str(e)
+        )
+        await db.commit()
+        raise
 
 
 @router.put(
@@ -348,11 +361,14 @@ async def update_user(
     - 10.1: Validate email format
     - 12.2: Enforce email uniqueness
     """
+    from app.services.audit_service import AuditService
+    
+    user_repo = UserRepository(db)
+    password_service = PasswordService()
+    admin_service = AdminService(user_repo, password_service)
+    audit_service = AuditService(db)
+    
     try:
-        user_repo = UserRepository(db)
-        password_service = PasswordService()
-        admin_service = AdminService(user_repo, password_service)
-        
         user = await admin_service.update_user(
             user_id=user_id,
             email=request.email,
@@ -361,15 +377,34 @@ async def update_user(
             is_admin=request.is_admin
         )
         
+        # Log successful action
+        await audit_service.log_user_update(
+            admin_id=current_admin.id,
+            admin_email=current_admin.email,
+            target_user_id=user.id,
+            target_user_email=user.email,
+            success=True
+        )
+        
+        await db.commit()
+        
         return AdminActionResponse(
             message="User updated successfully",
             user=AdminUserResponse.model_validate(user)
         )
-        
-    except ResourceNotFoundError as e:
-        raise ResourceNotFoundError(str(e))
-    except EmailAlreadyExistsError as e:
-        raise EmailAlreadyExistsError(str(e))
+    except Exception as e:
+        await db.rollback()
+        # Log failed action
+        await audit_service.log_user_update(
+            admin_id=current_admin.id,
+            admin_email=current_admin.email,
+            target_user_id=user_id,
+            target_user_email="",
+            success=False,
+            details=str(e)
+        )
+        await db.commit()
+        raise
 
 
 @router.delete(
@@ -415,22 +450,47 @@ async def delete_user(
     - 9.2: Unauthenticated users cannot access
     - 9.3: Verify admin status from database
     """
+    from app.services.audit_service import AuditService
+    
+    user_repo = UserRepository(db)
+    password_service = PasswordService()
+    admin_service = AdminService(user_repo, password_service)
+    audit_service = AuditService(db)
+    
     try:
-        user_repo = UserRepository(db)
-        password_service = PasswordService()
-        admin_service = AdminService(user_repo, password_service)
+        # Get user before deletion for audit log
+        user = await admin_service.get_user_by_id(user_id)
         
         await admin_service.delete_user(user_id, current_admin.id)
+        
+        # Log successful action
+        await audit_service.log_user_deletion(
+            admin_id=current_admin.id,
+            admin_email=current_admin.email,
+            target_user_id=user.id,
+            target_user_email=user.email,
+            success=True
+        )
+        
+        await db.commit()
         
         return AdminActionResponse(
             message="User deleted successfully",
             user=None
         )
-        
-    except ResourceNotFoundError as e:
-        raise ResourceNotFoundError(str(e))
-    except AuthorizationError as e:
-        raise AuthorizationError(str(e))
+    except Exception as e:
+        await db.rollback()
+        # Log failed action
+        await audit_service.log_user_deletion(
+            admin_id=current_admin.id,
+            admin_email=current_admin.email,
+            target_user_id=user_id,
+            target_user_email="",
+            success=False,
+            details=str(e)
+        )
+        await db.commit()
+        raise
 
 
 @router.patch(
@@ -475,17 +535,137 @@ async def toggle_verification(
     - 9.2: Unauthenticated users cannot access
     - 9.3: Verify admin status from database
     """
+    from app.services.audit_service import AuditService
+    
+    user_repo = UserRepository(db)
+    password_service = PasswordService()
+    admin_service = AdminService(user_repo, password_service)
+    audit_service = AuditService(db)
+    
     try:
-        user_repo = UserRepository(db)
-        password_service = PasswordService()
-        admin_service = AdminService(user_repo, password_service)
-        
         user = await admin_service.toggle_verification(user_id)
+        
+        # Log successful action
+        await audit_service.log_verification_toggle(
+            admin_id=current_admin.id,
+            admin_email=current_admin.email,
+            target_user_id=user.id,
+            target_user_email=user.email,
+            success=True,
+            details=f"Verification status toggled to {user.is_verified}"
+        )
+        
+        await db.commit()
         
         return AdminActionResponse(
             message="Verification status toggled successfully",
             user=AdminUserResponse.model_validate(user)
         )
+    except Exception as e:
+        await db.rollback()
+        # Log failed action
+        await audit_service.log_verification_toggle(
+            admin_id=current_admin.id,
+            admin_email=current_admin.email,
+            target_user_id=user_id,
+            target_user_email="",
+            success=False,
+            details=str(e)
+        )
+        await db.commit()
+        raise
+
+
+@router.get(
+    "/audit-logs",
+    status_code=status.HTTP_200_OK,
+    responses={
+        200: {
+            "description": "Audit logs retrieved successfully",
+        },
+        401: {
+            "description": "Not authenticated",
+        },
+        403: {
+            "description": "Not authorized",
+        },
+    },
+)
+async def get_audit_logs(
+    skip: Annotated[int, Query(ge=0)] = 0,
+    limit: Annotated[int, Query(ge=1, le=100)] = 25,
+    action_type: Annotated[str | None, Query()] = None,
+    admin_email: Annotated[str | None, Query()] = None,
+    current_admin: Annotated[User, Depends(get_current_admin_user)] = None,
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Get audit logs with optional filtering.
+    
+    **Parameters:**
+    - skip: Number of records to skip (pagination)
+    - limit: Number of records to return (max 100)
+    - action_type: Filter by action type (create_user, update_user, delete_user, etc.)
+    - admin_email: Filter by admin email
+    
+    **Requirements:**
+    - Admin authentication required
+    - Returns paginated audit logs
+    """
+    from app.models.audit_log import AuditLog
+    from sqlalchemy import select, desc, func
+    
+    try:
+        # Build base query for filtering
+        base_query = select(AuditLog)
         
-    except ResourceNotFoundError as e:
-        raise ResourceNotFoundError(str(e))
+        # Apply filters
+        if action_type:
+            base_query = base_query.where(AuditLog.action_type == action_type)
+        if admin_email:
+            base_query = base_query.where(AuditLog.admin_email.ilike(f"%{admin_email}%"))
+        
+        # Get total count with filters
+        count_query = select(func.count()).select_from(AuditLog)
+        if action_type:
+            count_query = count_query.where(AuditLog.action_type == action_type)
+        if admin_email:
+            count_query = count_query.where(AuditLog.admin_email.ilike(f"%{admin_email}%"))
+        
+        total_result = await db.execute(count_query)
+        total = total_result.scalar() or 0
+        
+        # Order by created_at descending (newest first) and apply pagination
+        query = base_query.order_by(desc(AuditLog.created_at)).offset(skip).limit(limit)
+        
+        # Execute query
+        result = await db.execute(query)
+        audit_logs = result.scalars().all()
+        
+        # Format response
+        logs_data = [
+            {
+                "id": log.id,
+                "admin_id": log.admin_id,
+                "admin_email": log.admin_email,
+                "action_type": log.action_type,
+                "target_user_id": log.target_user_id,
+                "target_user_email": log.target_user_email,
+                "success": log.success,
+                "details": log.details,
+                "created_at": log.created_at.isoformat(),
+            }
+            for log in audit_logs
+        ]
+        
+        return {
+            "logs": logs_data,
+            "total": total,
+            "skip": skip,
+            "limit": limit,
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(e)
+        )
