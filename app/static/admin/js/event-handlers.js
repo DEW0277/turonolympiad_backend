@@ -237,6 +237,10 @@ const EventHandlers = {
                 e.preventDefault();
                 EventHandlers.showAuditPage();
             }
+            if (e.target.dataset.nav === 'test-management') {
+                e.preventDefault();
+                EventHandlers.showTestManagementPage();
+            }
         });
     },
 
@@ -257,6 +261,24 @@ const EventHandlers = {
         document.querySelector('[data-nav="users"]').classList.remove('bg-blue-500', 'text-white');
         document.querySelector('[data-nav="users"]').classList.add('text-gray-700');
         AuditManagement.loadAuditLogs();
+    },
+
+    showTestManagementPage() {
+        document.getElementById('users-page').classList.add('hidden');
+        document.getElementById('audit-page').classList.add('hidden');
+        document.getElementById('test-management-page').classList.remove('hidden');
+        
+        document.querySelector('[data-nav="test-management"]').classList.add('bg-blue-500', 'text-white');
+        document.querySelector('[data-nav="test-management"]').classList.remove('text-gray-700');
+        document.querySelector('[data-nav="users"]').classList.remove('bg-blue-500', 'text-white');
+        document.querySelector('[data-nav="users"]').classList.add('text-gray-700');
+        document.querySelector('[data-nav="audit-logs"]').classList.remove('bg-blue-500', 'text-white');
+        document.querySelector('[data-nav="audit-logs"]').classList.add('text-gray-700');
+        
+        document.getElementById('page-title').textContent = 'Test Management';
+        document.getElementById('page-subtitle').textContent = 'Manage subjects, levels, tests, and questions';
+        
+        testMgmt.loadSubjects();
     },
 
     // Audit Pagination Events

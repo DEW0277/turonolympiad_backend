@@ -17,6 +17,7 @@ from fastapi.staticfiles import StaticFiles
 
 from app.api import auth
 from app.api import admin
+from app.api import test_management
 
 from app.api.deps import get_current_admin_user
 from app.core.exceptions import AuthException, AuthenticationError, AuthorizationError
@@ -201,6 +202,7 @@ async def general_exception_handler(request: Request, exc: Exception):
 # Include routers
 app.include_router(auth.router)
 app.include_router(admin.router)
+app.include_router(test_management.router)
 
 # Add login page route (GET /admin/login)
 @app.get("/admin/login", include_in_schema=False)

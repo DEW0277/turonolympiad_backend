@@ -2,5 +2,10 @@
 
 from app.models.user import User
 from app.models.audit_log import AuditLog
+from app.models.subject import Subject
+from app.models.level import Level
+from app.models.test import Test
+from app.models.question import Question
+from app.models.question_option import QuestionOption
 
-__all__ = ["User", "AuditLog"]
+__all__ = ["User", "AuditLog", "Subject", "Level", "Test", "Question", "QuestionOption"]

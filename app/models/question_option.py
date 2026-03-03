@@ -1,0 +1,62 @@
+"""QuestionOption database model.
+
+This module defines the QuestionOption SQLAlchemy model for answer choices.
+"""
+
+from datetime import datetime
+from sqlalchemy import String, DateTime, Integer, ForeignKey, Index, UniqueConstraint, CheckConstraint
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from app.database import Base
+
+
+class QuestionOption(Base):
+    """QuestionOption model for answer choices.
+    
+    Represents a single answer choice for a Question, labeled A, B, C, or D.
+    
+    Attributes:
+        id: Primary key, auto-incrementing integer
+        question_id: Foreign key to Question, indexed for fast lookups
+        label: Option label (A, B, C, or D)
+        text: Option text content (1+ characters)
+        created_at: Timestamp when option was created
+        updated_at: Timestamp when option was last updated
+        question: Many-to-one relationship with Question model
+    """
+    
+    __tablename__ = "question_options"
+    
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    question_id: Mapped[int] = mapped_column(Integer, ForeignKey("questions.id", ondelete="CASCADE"), nullable=False, index=True)
+    label: Mapped[str] = mapped_column(String(1), nullable=False)
+    text: Mapped[str] = mapped_column(String(1000), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow,
+        nullable=False
+    )
+    
+    # Relationships
+    question: Mapped["Question"] = relationship(
+        "Question",
+        back_populates="options",
+        lazy="select"
+    )
+    
+    # Constraints
+    __table_args__ = (
+        UniqueConstraint("question_id", "label", name="uq_question_option_label"),
+        CheckConstraint("label IN ('A', 'B', 'C', 'D')", name="ck_question_option_label"),
+        Index("idx_question_option_question_id", "question_id"),
+        Index("idx_question_option_label", "label"),
+    )
+    
+    def __repr__(self) -> str:
+        """String representation of QuestionOption."""
+        return f"<QuestionOption(id={self.id}, question_id={self.question_id}, label={self.label})>"
+
+
+# Import Question here to avoid circular imports
+from app.models.question import Question  # noqa: E402, F401

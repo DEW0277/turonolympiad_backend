@@ -33,6 +33,9 @@
                     <a href="#" class="block px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors" data-nav="audit-logs">
                         <span class="inline-block mr-2">📋</span>Audit Logs
                     </a>
+                    <a href="#" class="block px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors" data-nav="test-management">
+                        <span class="inline-block mr-2">📝</span>Test Management
+                    </a>
                 </div>
 
                 <!-- Future Features Placeholder -->
@@ -262,6 +265,113 @@
                             <button
                                 id="audit-next-page-btn"
                                 class="px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            >
+                                Next →
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Test Management Page -->
+                <div id="test-management-page" class="hidden p-8">
+                    <!-- Breadcrumb Navigation -->
+                    <div id="test-breadcrumb" class="mb-6 flex items-center space-x-2 text-sm text-gray-600">
+                        <a href="#" class="text-blue-500 hover:text-blue-600" onclick="testMgmt.loadSubjects(); return false;">Subjects</a>
+                    </div>
+
+                    <!-- Toolbar -->
+                    <div class="mb-6 bg-white rounded-lg border border-gray-200 p-4 flex items-center justify-between">
+                        <h3 class="text-lg font-semibold text-gray-900" id="test-toolbar-title">Test Management</h3>
+                        <button
+                            id="test-toolbar-btn"
+                            class="px-4 py-2 bg-blue-500 text-white rounded-md text-sm font-medium hover:bg-blue-600 transition-colors"
+                            data-action="create-subject"
+                        >
+                            + Create Subject
+                        </button>
+                    </div>
+
+                    <!-- Main Content Area -->
+                    <div id="test-content" class="bg-white rounded-lg border border-gray-200 overflow-x-auto">
+                        <!-- Subjects Table -->
+                        <table id="subjects-table" class="w-full">
+                            <thead class="bg-gray-50 border-b border-gray-200">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">ID</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Name</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Created</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="subjects-table-body" class="divide-y divide-gray-200">
+                                <!-- Subjects will be inserted here -->
+                            </tbody>
+                        </table>
+
+                        <!-- Levels Table -->
+                        <table id="levels-table" class="hidden w-full">
+                            <thead class="bg-gray-50 border-b border-gray-200">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">ID</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Name</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="levels-table-body" class="divide-y divide-gray-200">
+                                <!-- Levels will be inserted here -->
+                            </tbody>
+                        </table>
+
+                        <!-- Tests Table -->
+                        <table id="tests-table" class="hidden w-full">
+                            <thead class="bg-gray-50 border-b border-gray-200">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">ID</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Name</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Start Date</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">End Date</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tests-table-body" class="divide-y divide-gray-200">
+                                <!-- Tests will be inserted here -->
+                            </tbody>
+                        </table>
+
+                        <!-- Questions Table -->
+                        <table id="questions-table" class="hidden w-full">
+                            <thead class="bg-gray-50 border-b border-gray-200">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">ID</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Text</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Correct Answer</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Options Count</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="questions-table-body" class="divide-y divide-gray-200">
+                                <!-- Questions will be inserted here -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination Controls -->
+                    <div id="test-pagination" class="mt-6 flex items-center justify-between bg-white rounded-lg border border-gray-200 p-4">
+                        <div class="text-sm text-gray-600">
+                            Showing <span id="test-page-start">0</span>-<span id="test-page-end">0</span> of <span id="test-total-count">0</span> items
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <button
+                                id="test-prev-page-btn"
+                                class="px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                data-action="test-prev-page"
+                            >
+                                ← Previous
+                            </button>
+                            <button
+                                id="test-next-page-btn"
+                                class="px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                data-action="test-next-page"
                             >
                                 Next →
                             </button>
@@ -535,6 +645,273 @@
         </div>
     </div>
 
+    <!-- Create Subject Modal -->
+    <div id="create-subject-modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+            <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900">Create New Subject</h3>
+                    <p class="text-xs text-gray-500 mt-1">Add a new subject to the system</p>
+                </div>
+                <button class="text-gray-400 hover:text-gray-600" data-action="close-modal" data-modal="create-subject-modal">
+                    ✕
+                </button>
+            </div>
+            <form id="create-subject-form" class="p-6 space-y-4">
+                <div>
+                    <label for="subject-name" class="block text-sm font-medium text-gray-700 mb-2">
+                        Subject Name
+                    </label>
+                    <input
+                        type="text"
+                        id="subject-name"
+                        name="name"
+                        required
+                        class="w-full px-4 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="e.g., Mathematics, Science, English"
+                    >
+                </div>
+                <div class="flex space-x-3 pt-4">
+                    <button
+                        type="button"
+                        class="flex-1 px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                        data-action="close-modal"
+                        data-modal="create-subject-modal"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        type="submit"
+                        class="flex-1 px-4 py-2 bg-blue-500 text-white rounded-md text-sm font-medium hover:bg-blue-600 transition-colors"
+                    >
+                        Create Subject
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Create Level Modal -->
+    <div id="create-level-modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+            <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900">Create New Level</h3>
+                    <p class="text-xs text-gray-500 mt-1">Add a new difficulty level</p>
+                </div>
+                <button class="text-gray-400 hover:text-gray-600" data-action="close-modal" data-modal="create-level-modal">
+                    ✕
+                </button>
+            </div>
+            <form id="create-level-form" class="p-6 space-y-4">
+                <div>
+                    <label for="level-name" class="block text-sm font-medium text-gray-700 mb-2">
+                        Level Name
+                    </label>
+                    <input
+                        type="text"
+                        id="level-name"
+                        name="name"
+                        required
+                        class="w-full px-4 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="e.g., Beginner, Intermediate, Advanced"
+                    >
+                </div>
+                <div class="flex space-x-3 pt-4">
+                    <button
+                        type="button"
+                        class="flex-1 px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                        data-action="close-modal"
+                        data-modal="create-level-modal"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        type="submit"
+                        class="flex-1 px-4 py-2 bg-blue-500 text-white rounded-md text-sm font-medium hover:bg-blue-600 transition-colors"
+                    >
+                        Create Level
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Create Test Modal -->
+    <div id="create-test-modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+            <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900">Create New Test</h3>
+                    <p class="text-xs text-gray-500 mt-1">Set up a new test with dates</p>
+                </div>
+                <button class="text-gray-400 hover:text-gray-600" data-action="close-modal" data-modal="create-test-modal">
+                    ✕
+                </button>
+            </div>
+            <form id="create-test-form" class="p-6 space-y-4">
+                <div>
+                    <label for="test-name" class="block text-sm font-medium text-gray-700 mb-2">
+                        Test Name
+                    </label>
+                    <input
+                        type="text"
+                        id="test-name"
+                        name="name"
+                        required
+                        class="w-full px-4 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="e.g., Midterm Exam, Quiz 1"
+                    >
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="test-start-date" class="block text-sm font-medium text-gray-700 mb-2">
+                            Start Date & Time
+                        </label>
+                        <input
+                            type="datetime-local"
+                            id="test-start-date"
+                            name="start_date"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        >
+                        <p class="text-xs text-gray-500 mt-1">Optional</p>
+                    </div>
+                    <div>
+                        <label for="test-end-date" class="block text-sm font-medium text-gray-700 mb-2">
+                            End Date & Time
+                        </label>
+                        <input
+                            type="datetime-local"
+                            id="test-end-date"
+                            name="end_date"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        >
+                        <p class="text-xs text-gray-500 mt-1">Optional</p>
+                    </div>
+                </div>
+                <div id="test-date-feedback" class="hidden text-xs text-amber-600 bg-amber-50 p-2 rounded"></div>
+                <div class="flex space-x-3 pt-4">
+                    <button
+                        type="button"
+                        class="flex-1 px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                        data-action="close-modal"
+                        data-modal="create-test-modal"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        type="submit"
+                        class="flex-1 px-4 py-2 bg-blue-500 text-white rounded-md text-sm font-medium hover:bg-blue-600 transition-colors"
+                    >
+                        Create Test
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Create Question Modal -->
+    <div id="create-question-modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between sticky top-0 bg-white">
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900">Create New Question</h3>
+                    <p class="text-xs text-gray-500 mt-1">Add a multiple-choice question with options</p>
+                </div>
+                <button class="text-gray-400 hover:text-gray-600" data-action="close-modal" data-modal="create-question-modal">
+                    ✕
+                </button>
+            </div>
+            <form id="create-question-form" class="p-6 space-y-6">
+                <!-- Question Text -->
+                <div>
+                    <label for="question-text" class="block text-sm font-medium text-gray-700 mb-2">
+                        Question Text
+                    </label>
+                    <textarea
+                        id="question-text"
+                        name="text"
+                        required
+                        rows="4"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                        placeholder="Enter the complete question text here..."
+                    ></textarea>
+                    <p class="text-xs text-gray-500 mt-1">Be clear and specific</p>
+                </div>
+
+                <!-- Correct Answer Selector -->
+                <div>
+                    <label for="question-correct-answer" class="block text-sm font-medium text-gray-700 mb-2">
+                        Correct Answer
+                    </label>
+                    <select
+                        id="question-correct-answer"
+                        name="correct_answer"
+                        required
+                        class="w-full px-4 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                        <option value="">Select the correct answer...</option>
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="C">C</option>
+                        <option value="D">D</option>
+                        <option value="E">E</option>
+                        <option value="F">F</option>
+                        <option value="G">G</option>
+                        <option value="H">H</option>
+                        <option value="I">I</option>
+                        <option value="J">J</option>
+                    </select>
+                    <p class="text-xs text-gray-500 mt-1">This will be updated as you add options</p>
+                </div>
+
+                <!-- Options Section -->
+                <div class="border-t pt-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Answer Options</label>
+                            <p class="text-xs text-gray-500 mt-1">Minimum 3 options required</p>
+                        </div>
+                        <button
+                            type="button"
+                            id="add-option-btn"
+                            class="px-3 py-1 bg-green-100 text-green-700 rounded text-xs font-medium hover:bg-green-200 transition-colors"
+                            onclick="testMgmt.addOption()"
+                        >
+                            + Add Option
+                        </button>
+                    </div>
+
+                    <!-- Options List -->
+                    <div id="options-container" class="space-y-3">
+                        <!-- Options will be dynamically inserted here -->
+                    </div>
+                </div>
+
+                <!-- Validation Feedback -->
+                <div id="question-validation-feedback" class="hidden text-xs p-3 rounded"></div>
+
+                <!-- Form Actions -->
+                <div class="flex space-x-3 pt-4 border-t">
+                    <button
+                        type="button"
+                        class="flex-1 px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                        data-action="close-modal"
+                        data-modal="create-question-modal"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        type="submit"
+                        class="flex-1 px-4 py-2 bg-blue-500 text-white rounded-md text-sm font-medium hover:bg-blue-600 transition-colors"
+                    >
+                        Create Question
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Toast Notification Container -->
     <div id="toast-container" class="fixed top-4 right-4 space-y-2 z-40 pointer-events-none"></div>
 
@@ -546,5 +923,6 @@
     <script src="/static/admin/js/audit-management.js"></script>
     <script src="/static/admin/js/event-handlers.js"></script>
     <script src="/static/admin/js/init.js"></script>
+    <script src="/static/admin/js/test-management.js"></script>
 </body>
 </html>
