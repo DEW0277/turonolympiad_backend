@@ -62,7 +62,14 @@ class Question(Base):
     
     def __repr__(self) -> str:
         """String representation of Question."""
-        return f"<Question(id={getattr(self, 'id', None)}, test_id={getattr(self, 'test_id', None)}, correct_answer={getattr(self, 'correct_answer', None)})>"
+        try:
+            # Use object.__getattribute__ to avoid SQLAlchemy attribute access
+            id_val = object.__getattribute__(self, '__dict__').get('id', 'Unknown')
+            test_id_val = object.__getattribute__(self, '__dict__').get('test_id', 'Unknown')
+            correct_answer_val = object.__getattribute__(self, '__dict__').get('correct_answer', 'Unknown')
+            return f"<Question(id={id_val}, test_id={test_id_val}, correct_answer={correct_answer_val})>"
+        except:
+            return f"<Question at {hex(id(self))}>"
 
 
 # Import Test and QuestionOption here to avoid circular imports

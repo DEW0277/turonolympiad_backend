@@ -89,9 +89,10 @@ class TestRepository(BaseRepository[Test]):
         self, 
         level_id: int, 
         skip: int = 0, 
-        limit: int = 50
+        limit: int = 50,
+        search: str = None
     ) -> Tuple[List[Test], int]:
-        """Fetch paginated tests for a level.
+        """Fetch paginated tests for a level with optional search.
         
         Retrieves a paginated list of tests for a specific level,
         ordered by created_at descending.
@@ -100,21 +101,29 @@ class TestRepository(BaseRepository[Test]):
             level_id: ID of the parent level
             skip: Number of records to skip for pagination (default: 0)
             limit: Maximum number of records to return (default: 50)
+            search: Optional search term to filter by name (case-insensitive)
             
         Returns:
             Tuple of (tests, total_count) where tests is a list of Test instances
-            and total_count is the total number of tests for the level
+            and total_count is the total number of tests matching the search criteria
         """
+        # Build base query
+        query = select(Test).where(Test.level_id == level_id)
+        count_query = select(func.count(Test.id)).where(Test.level_id == level_id)
+        
+        # Add search filter if provided
+        if search:
+            search_filter = Test.name.ilike(f"%{search}%")
+            query = query.where(search_filter)
+            count_query = count_query.where(search_filter)
+        
         # Get total count for level
-        count_result = await self.db.execute(
-            select(func.count(Test.id)).where(Test.level_id == level_id)
-        )
+        count_result = await self.db.execute(count_query)
         total_count = count_result.scalar() or 0
         
         # Get paginated results
         result = await self.db.execute(
-            select(Test)
-            .where(Test.level_id == level_id)
+            query
             .order_by(Test.created_at.desc())
             .offset(skip)
             .limit(limit)

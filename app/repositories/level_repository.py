@@ -75,9 +75,10 @@ class LevelRepository(BaseRepository[Level]):
         self, 
         subject_id: int, 
         skip: int = 0, 
-        limit: int = 50
+        limit: int = 50,
+        search: str = None
     ) -> Tuple[List[Level], int]:
-        """Fetch paginated levels for a subject.
+        """Fetch paginated levels for a subject with optional search.
         
         Retrieves a paginated list of levels for a specific subject,
         ordered by created_at descending.
@@ -86,21 +87,29 @@ class LevelRepository(BaseRepository[Level]):
             subject_id: ID of the parent subject
             skip: Number of records to skip for pagination (default: 0)
             limit: Maximum number of records to return (default: 50)
+            search: Optional search term to filter by name (case-insensitive)
             
         Returns:
             Tuple of (levels, total_count) where levels is a list of Level instances
-            and total_count is the total number of levels for the subject
+            and total_count is the total number of levels matching the search criteria
         """
+        # Build base query
+        query = select(Level).where(Level.subject_id == subject_id)
+        count_query = select(func.count(Level.id)).where(Level.subject_id == subject_id)
+        
+        # Add search filter if provided
+        if search:
+            search_filter = Level.name.ilike(f"%{search}%")
+            query = query.where(search_filter)
+            count_query = count_query.where(search_filter)
+        
         # Get total count for subject
-        count_result = await self.db.execute(
-            select(func.count(Level.id)).where(Level.subject_id == subject_id)
-        )
+        count_result = await self.db.execute(count_query)
         total_count = count_result.scalar() or 0
         
         # Get paginated results
         result = await self.db.execute(
-            select(Level)
-            .where(Level.subject_id == subject_id)
+            query
             .order_by(Level.created_at.desc())
             .offset(skip)
             .limit(limit)

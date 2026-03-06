@@ -107,14 +107,16 @@ class LevelService:
         self, 
         subject_id: int,
         skip: int = 0, 
-        limit: int = 50
+        limit: int = 50,
+        search: str = None
     ) -> Tuple[List[Level], int]:
-        """List levels for a subject with pagination.
+        """List levels for a subject with pagination and search.
         
         Args:
             subject_id: Parent subject ID
             skip: Number of records to skip (default: 0)
             limit: Maximum number of records to return (default: 50)
+            search: Optional search term to filter by name
             
         Returns:
             Tuple of (levels, total_count)
@@ -130,7 +132,8 @@ class LevelService:
         return await self.level_repo.list_by_subject(
             subject_id=subject_id,
             skip=skip,
-            limit=limit
+            limit=limit,
+            search=search
         )
     
     async def update_level(self, level_id: int, name: str) -> Level:

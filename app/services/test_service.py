@@ -146,14 +146,16 @@ class TestService:
         self, 
         level_id: int,
         skip: int = 0, 
-        limit: int = 50
+        limit: int = 50,
+        search: str = None
     ) -> Tuple[List[Test], int]:
-        """List tests for a level with pagination.
+        """List tests for a level with pagination and search.
         
         Args:
             level_id: Parent level ID
             skip: Number of records to skip (default: 0)
             limit: Maximum number of records to return (default: 50)
+            search: Optional search term to filter by name
             
         Returns:
             Tuple of (tests, total_count)
@@ -169,7 +171,8 @@ class TestService:
         return await self.test_repo.list_by_level(
             level_id=level_id,
             skip=skip,
-            limit=limit
+            limit=limit,
+            search=search
         )
     
     async def update_test(

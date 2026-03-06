@@ -187,14 +187,16 @@ class QuestionService:
         self, 
         test_id: int,
         skip: int = 0, 
-        limit: int = 100
+        limit: int = 100,
+        search: str = None
     ) -> Tuple[List[Question], int]:
-        """List questions for a test with pagination.
+        """List questions for a test with pagination and search.
         
         Args:
             test_id: Parent test ID
             skip: Number of records to skip (default: 0)
             limit: Maximum number of records to return (default: 100)
+            search: Optional search term to filter by question text
             
         Returns:
             Tuple of (questions, total_count)
@@ -210,7 +212,8 @@ class QuestionService:
         return await self.question_repo.list_by_test(
             test_id=test_id,
             skip=skip,
-            limit=limit
+            limit=limit,
+            search=search
         )
     
     async def update_question(

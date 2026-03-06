@@ -71,9 +71,10 @@ class QuestionRepository(BaseRepository[Question]):
         self, 
         test_id: int, 
         skip: int = 0, 
-        limit: int = 100
+        limit: int = 100,
+        search: str = None
     ) -> Tuple[List[Question], int]:
-        """Fetch paginated questions for a test.
+        """Fetch paginated questions for a test with optional search.
         
         Retrieves a paginated list of questions for a specific test,
         ordered by created_at ascending (in order of creation).
@@ -82,21 +83,29 @@ class QuestionRepository(BaseRepository[Question]):
             test_id: ID of the parent test
             skip: Number of records to skip for pagination (default: 0)
             limit: Maximum number of records to return (default: 100)
+            search: Optional search term to filter by question text (case-insensitive)
             
         Returns:
             Tuple of (questions, total_count) where questions is a list of Question instances
-            and total_count is the total number of questions for the test
+            and total_count is the total number of questions matching the search criteria
         """
+        # Build base query
+        query = select(Question).where(Question.test_id == test_id)
+        count_query = select(func.count(Question.id)).where(Question.test_id == test_id)
+        
+        # Add search filter if provided
+        if search:
+            search_filter = Question.text.ilike(f"%{search}%")
+            query = query.where(search_filter)
+            count_query = count_query.where(search_filter)
+        
         # Get total count for test
-        count_result = await self.db.execute(
-            select(func.count(Question.id)).where(Question.test_id == test_id)
-        )
+        count_result = await self.db.execute(count_query)
         total_count = count_result.scalar() or 0
         
         # Get paginated results with eagerly loaded options
         result = await self.db.execute(
-            select(Question)
-            .where(Question.test_id == test_id)
+            query
             .order_by(Question.created_at.asc())
             .offset(skip)
             .limit(limit)

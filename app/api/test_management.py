@@ -64,14 +64,15 @@ router = APIRouter(prefix="/api/admin", tags=["test-management"])
 async def list_subjects(
     skip: int = Query(0, ge=0, description="Number of records to skip"),
     limit: int = Query(50, ge=1, le=100, description="Maximum records to return"),
+    search: str = Query(None, description="Search term for filtering by name"),
     current_user: User = Depends(get_current_admin_user),
     db: AsyncSession = Depends(get_db),
 ):
-    """List all subjects with pagination."""
+    """List all subjects with pagination and search."""
     try:
         repo = SubjectRepository(db)
         service = SubjectService(repo)
-        subjects, total = await service.list_subjects(skip=skip, limit=limit)
+        subjects, total = await service.list_subjects(skip=skip, limit=limit, search=search)
         return SubjectListResponse(
             items=subjects,
             total=total,
@@ -195,15 +196,16 @@ async def list_levels(
     subject_id: int,
     skip: int = Query(0, ge=0, description="Number of records to skip"),
     limit: int = Query(50, ge=1, le=100, description="Maximum records to return"),
+    search: str = Query(None, description="Search term for filtering by name"),
     current_user: User = Depends(get_current_admin_user),
     db: AsyncSession = Depends(get_db),
 ):
-    """List levels for a subject."""
+    """List levels for a subject with search."""
     try:
         level_repo = LevelRepository(db)
         subject_repo = SubjectRepository(db)
         service = LevelService(level_repo, subject_repo)
-        levels, total = await service.list_levels(subject_id, skip=skip, limit=limit)
+        levels, total = await service.list_levels(subject_id, skip=skip, limit=limit, search=search)
         return LevelListResponse(
             items=levels,
             total=total,
@@ -339,15 +341,16 @@ async def list_tests(
     level_id: int,
     skip: int = Query(0, ge=0, description="Number of records to skip"),
     limit: int = Query(50, ge=1, le=100, description="Maximum records to return"),
+    search: str = Query(None, description="Search term for filtering by name"),
     current_user: User = Depends(get_current_admin_user),
     db: AsyncSession = Depends(get_db),
 ):
-    """List tests for a level."""
+    """List tests for a level with search."""
     try:
         test_repo = TestRepository(db)
         level_repo = LevelRepository(db)
         service = TestService(test_repo, level_repo)
-        tests, total = await service.list_tests(level_id, skip=skip, limit=limit)
+        tests, total = await service.list_tests(level_id, skip=skip, limit=limit, search=search)
         return TestListResponse(
             items=tests,
             total=total,
@@ -493,16 +496,17 @@ async def list_questions(
     test_id: int,
     skip: int = Query(0, ge=0, description="Number of records to skip"),
     limit: int = Query(100, ge=1, le=200, description="Maximum records to return"),
+    search: str = Query(None, description="Search term for filtering by question text"),
     current_user: User = Depends(get_current_admin_user),
     db: AsyncSession = Depends(get_db),
 ):
-    """List questions for a test."""
+    """List questions for a test with search."""
     try:
         question_repo = QuestionRepository(db)
         option_repo = QuestionOptionRepository(db)
         test_repo = TestRepository(db)
         service = QuestionService(question_repo, option_repo, test_repo)
-        questions, total = await service.list_questions(test_id, skip=skip, limit=limit)
+        questions, total = await service.list_questions(test_id, skip=skip, limit=limit, search=search)
         return QuestionListResponse(
             items=questions,
             total=total,
@@ -539,8 +543,10 @@ async def create_question(
             options=[{"label": opt.label, "text": opt.text} for opt in request.options]
         )
         await db.commit()
-        await db.refresh(question)
-        return question
+        
+        # Reload the question with eagerly loaded options to avoid lazy loading issues
+        question_with_options = await question_repo.get_by_id(question.id)
+        return question_with_options
     except ValidationError as e:
         raise HTTPException(status_code=400, detail=e.message)
     except ResourceNotFoundError as e:

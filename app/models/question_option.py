@@ -12,12 +12,12 @@ from app.database import Base
 class QuestionOption(Base):
     """QuestionOption model for answer choices.
     
-    Represents a single answer choice for a Question, labeled A, B, C, or D.
+    Represents a single answer choice for a Question, labeled A-J.
     
     Attributes:
         id: Primary key, auto-incrementing integer
         question_id: Foreign key to Question, indexed for fast lookups
-        label: Option label (A, B, C, or D)
+        label: Option label (A-J)
         text: Option text content (1+ characters)
         created_at: Timestamp when option was created
         updated_at: Timestamp when option was last updated
@@ -48,14 +48,21 @@ class QuestionOption(Base):
     # Constraints
     __table_args__ = (
         UniqueConstraint("question_id", "label", name="uq_question_option_label"),
-        CheckConstraint("label IN ('A', 'B', 'C', 'D')", name="ck_question_option_label"),
+        CheckConstraint("label IN ('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J')", name="ck_question_option_label"),
         Index("idx_question_option_question_id", "question_id"),
         Index("idx_question_option_label", "label"),
     )
     
     def __repr__(self) -> str:
         """String representation of QuestionOption."""
-        return f"<QuestionOption(id={self.id}, question_id={self.question_id}, label={self.label})>"
+        try:
+            # Use object.__getattribute__ to avoid SQLAlchemy attribute access
+            id_val = object.__getattribute__(self, '__dict__').get('id', 'Unknown')
+            question_id_val = object.__getattribute__(self, '__dict__').get('question_id', 'Unknown')
+            label_val = object.__getattribute__(self, '__dict__').get('label', 'Unknown')
+            return f"<QuestionOption(id={id_val}, question_id={question_id_val}, label={label_val})>"
+        except:
+            return f"<QuestionOption at {hex(id(self))}>"
 
 
 # Import Question here to avoid circular imports

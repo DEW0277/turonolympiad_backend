@@ -90,18 +90,20 @@ class SubjectService:
     async def list_subjects(
         self, 
         skip: int = 0, 
-        limit: int = 50
+        limit: int = 50,
+        search: str = None
     ) -> Tuple[List[Subject], int]:
-        """List all subjects with pagination.
+        """List all subjects with pagination and search.
         
         Args:
             skip: Number of records to skip (default: 0)
             limit: Maximum number of records to return (default: 50)
+            search: Optional search term to filter by name
             
         Returns:
             Tuple of (subjects, total_count)
         """
-        return await self.subject_repo.list(skip=skip, limit=limit)
+        return await self.subject_repo.list(skip=skip, limit=limit, search=search)
     
     async def update_subject(self, subject_id: int, name: str) -> Subject:
         """Update a subject.

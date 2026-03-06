@@ -67,26 +67,37 @@ class SubjectRepository(BaseRepository[Subject]):
         )
         return result.scalar_one_or_none()
     
-    async def list(self, skip: int = 0, limit: int = 50) -> Tuple[List[Subject], int]:
-        """Fetch paginated subjects.
+    async def list(self, skip: int = 0, limit: int = 50, search: str = None) -> Tuple[List[Subject], int]:
+        """Fetch paginated subjects with optional search.
         
         Retrieves a paginated list of subjects ordered by created_at descending.
         
         Args:
             skip: Number of records to skip for pagination (default: 0)
             limit: Maximum number of records to return (default: 50)
+            search: Optional search term to filter by name (case-insensitive)
             
         Returns:
             Tuple of (subjects, total_count) where subjects is a list of Subject instances
-            and total_count is the total number of subjects in database
+            and total_count is the total number of subjects matching the search criteria
         """
+        # Build base query
+        query = select(Subject)
+        count_query = select(func.count(Subject.id))
+        
+        # Add search filter if provided
+        if search:
+            search_filter = Subject.name.ilike(f"%{search}%")
+            query = query.where(search_filter)
+            count_query = count_query.where(search_filter)
+        
         # Get total count
-        count_result = await self.db.execute(select(func.count(Subject.id)))
+        count_result = await self.db.execute(count_query)
         total_count = count_result.scalar() or 0
         
         # Get paginated results
         result = await self.db.execute(
-            select(Subject)
+            query
             .order_by(Subject.created_at.desc())
             .offset(skip)
             .limit(limit)
