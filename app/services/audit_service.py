@@ -5,7 +5,7 @@ This module provides the AuditService for recording all administrative
 operations performed by admin users for compliance and security purposes.
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import insert
 
@@ -58,7 +58,7 @@ class AuditService:
             target_user_email=target_user_email,
             success=success,
             details=details,
-            created_at=datetime.utcnow()
+            created_at=datetime.now(timezone.utc)
         )
         
         self.db.add(audit_log)

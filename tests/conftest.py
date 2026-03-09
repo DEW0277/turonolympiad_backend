@@ -2,6 +2,7 @@
 
 import asyncio
 import pytest
+import pytest_asyncio
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 
@@ -9,6 +10,14 @@ from app.main import app
 from app.database import Base, get_db
 from app.models.user import User
 from app.services.password_service import PasswordService
+
+
+# Configure pytest to not collect classes with these names as test classes
+def pytest_configure(config):
+    """Configure pytest to ignore specific class names during collection."""
+    config.addinivalue_line(
+        "python_classes", "!Test !TestRepository !TestService"
+    )
 
 
 # Test database URL
@@ -23,9 +32,13 @@ def event_loop():
     loop.close()
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def test_db():
     """Create a test database and return a session."""
+    # Override cookie settings for testing
+    from app.config import settings
+    settings.cookie_secure = False  # Allow cookies over HTTP in tests
+    
     engine = create_async_engine(
         TEST_DATABASE_URL,
         echo=False,
@@ -53,14 +66,19 @@ async def test_db():
     await engine.dispose()
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def client(test_db):
     """Create a test client."""
-    async with AsyncClient(app=app, base_url="http://test") as ac:
+    from httpx import ASGITransport
+    async with AsyncClient(
+        transport=ASGITransport(app=app), 
+        base_url="http://test",
+        follow_redirects=True
+    ) as ac:
         yield ac
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def admin_user(test_db):
     """Create an admin user for testing."""
     async with test_db() as session:
@@ -77,7 +95,7 @@ async def admin_user(test_db):
         return user
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def regular_user(test_db):
     """Create a regular user for testing."""
     async with test_db() as session:

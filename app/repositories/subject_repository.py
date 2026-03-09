@@ -28,19 +28,33 @@ class SubjectRepository(BaseRepository[Subject]):
         """
         super().__init__(Subject, db)
     
-    async def create(self, name: str) -> Subject:
+    async def create(
+        self,
+        name_en: str,
+        name_uz: str,
+        name_ru: str,
+        name: Optional[str] = None
+    ) -> Subject:
         """Create a new subject record.
         
         Args:
-            name: Subject name (must be unique)
+            name_en: Subject name in English (must be unique)
+            name_uz: Subject name in Uzbek
+            name_ru: Subject name in Russian
+            name: Legacy subject name (optional, for backward compatibility)
             
         Returns:
             Created Subject instance with all fields populated
             
         Raises:
-            IntegrityError: If name already exists in database
+            IntegrityError: If name_en already exists in database
         """
-        return await super().create(name=name)
+        return await super().create(
+            name_en=name_en,
+            name_uz=name_uz,
+            name_ru=name_ru,
+            name=name
+        )
     
     async def get_by_id(self, id: int) -> Optional[Subject]:
         """Retrieve subject by ID.
@@ -54,16 +68,16 @@ class SubjectRepository(BaseRepository[Subject]):
         return await super().get_by_id(id)
     
     async def get_by_name(self, name: str) -> Optional[Subject]:
-        """Retrieve subject by name.
+        """Retrieve subject by English name.
         
         Args:
-            name: Subject name to search for
+            name: Subject name in English to search for
             
         Returns:
             Subject instance if found, None otherwise
         """
         result = await self.db.execute(
-            select(Subject).where(Subject.name == name)
+            select(Subject).where(Subject.name_en == name)
         )
         return result.scalar_one_or_none()
     
@@ -75,7 +89,7 @@ class SubjectRepository(BaseRepository[Subject]):
         Args:
             skip: Number of records to skip for pagination (default: 0)
             limit: Maximum number of records to return (default: 50)
-            search: Optional search term to filter by name (case-insensitive)
+            search: Optional search term to filter by name (case-insensitive, searches all languages)
             
         Returns:
             Tuple of (subjects, total_count) where subjects is a list of Subject instances
@@ -85,9 +99,13 @@ class SubjectRepository(BaseRepository[Subject]):
         query = select(Subject)
         count_query = select(func.count(Subject.id))
         
-        # Add search filter if provided
+        # Add search filter if provided (search across all language fields)
         if search:
-            search_filter = Subject.name.ilike(f"%{search}%")
+            search_filter = (
+                Subject.name_en.ilike(f"%{search}%") |
+                Subject.name_uz.ilike(f"%{search}%") |
+                Subject.name_ru.ilike(f"%{search}%")
+            )
             query = query.where(search_filter)
             count_query = count_query.where(search_filter)
         
@@ -106,12 +124,22 @@ class SubjectRepository(BaseRepository[Subject]):
         
         return (subjects, total_count)
     
-    async def update(self, id: int, name: str) -> Subject:
+    async def update(
+        self,
+        id: int,
+        name_en: str,
+        name_uz: str,
+        name_ru: str,
+        name: Optional[str] = None
+    ) -> Subject:
         """Update subject by ID.
         
         Args:
             id: Subject's primary key ID
-            name: New subject name
+            name_en: New subject name in English
+            name_uz: New subject name in Uzbek
+            name_ru: New subject name in Russian
+            name: Legacy subject name (optional, for backward compatibility)
             
         Returns:
             Updated Subject instance
@@ -123,7 +151,13 @@ class SubjectRepository(BaseRepository[Subject]):
         if subject is None:
             raise ValueError(f"Subject with id {id} not found")
         
-        return await super().update(subject, name=name)
+        return await super().update(
+            subject,
+            name_en=name_en,
+            name_uz=name_uz,
+            name_ru=name_ru,
+            name=name
+        )
     
     async def delete(self, id: int) -> None:
         """Delete subject by ID.

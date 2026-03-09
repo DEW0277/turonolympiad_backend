@@ -7,8 +7,8 @@ const state = {
     currentPage: 0,
     pageSize: 25,
     searchQuery: '',
-    verifiedFilter: null,
-    adminFilter: null,
+    verifiedFilter: '',
+    adminFilter: '',
     totalUsers: 0,
     users: [],
     deleteUserId: null,
@@ -18,8 +18,8 @@ const state = {
     // Reset filters
     resetFilters() {
         this.searchQuery = '';
-        this.verifiedFilter = null;
-        this.adminFilter = null;
+        this.verifiedFilter = '';
+        this.adminFilter = '';
         this.currentPage = 0;
     },
     

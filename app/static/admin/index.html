@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - User Management</title>
+    <title>Admin Panel - Dashboard</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Custom Responsive Styles -->
     <link rel="stylesheet" href="/static/admin/css/responsive.css">
-
 </head>
 <body class="bg-white text-gray-900">
     <div class="flex h-screen bg-white">
@@ -22,33 +21,31 @@
 
             <!-- Navigation Menu -->
             <nav class="flex-1 px-4 py-6 space-y-2">
-                <!-- Users Section -->
                 <div class="space-y-1">
                     <h3 class="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                        Management
+                        User Management
                     </h3>
-                    <a href="#" class="block px-3 py-2 rounded-md text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 transition-colors" data-nav="users">
+                    <a href="/admin/users" class="block px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors">
                         <span class="inline-block mr-2">👥</span>Users
                     </a>
-                    <a href="#" class="block px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors" data-nav="audit-logs">
+                    <a href="/admin/audit" class="block px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors">
                         <span class="inline-block mr-2">📋</span>Audit Logs
                     </a>
-                    <a href="#" class="block px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors" data-nav="test-management">
-                        <span class="inline-block mr-2">📝</span>Test Management
-                    </a>
                 </div>
-
-                <!-- Future Features Placeholder -->
-                <div class="space-y-1 pt-4">
+                
+                <div class="space-y-1">
                     <h3 class="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                        Coming Soon
+                        Test Management
                     </h3>
-                    <button class="w-full text-left px-3 py-2 rounded-md text-sm text-gray-500 cursor-not-allowed opacity-50" disabled>
-                        <span class="inline-block mr-2">📊</span>Analytics
-                    </button>
-                    <button class="w-full text-left px-3 py-2 rounded-md text-sm text-gray-500 cursor-not-allowed opacity-50" disabled>
-                        <span class="inline-block mr-2">⚙️</span>Settings
-                    </button>
+                    <a href="/admin/subjects" class="block px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors">
+                        <span class="inline-block mr-2">📝</span>Subjects
+                    </a>
+                    <a href="/admin/levels" class="block px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors">
+                        <span class="inline-block mr-2">📊</span>Levels
+                    </a>
+                    <a href="/admin/tests" class="block px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors">
+                        <span class="inline-block mr-2">📋</span>Tests
+                    </a>
                 </div>
             </nav>
 
@@ -65,8 +62,8 @@
             <!-- Header -->
             <header class="bg-white border-b border-gray-200 px-8 py-4 flex items-center justify-between">
                 <div>
-                    <h2 class="text-2xl font-bold text-gray-900" id="page-title">User Management</h2>
-                    <p class="text-sm text-gray-500 mt-1" id="page-subtitle">Manage platform users and permissions</p>
+                    <h2 class="text-2xl font-bold text-gray-900">Admin Dashboard</h2>
+                    <p class="text-sm text-gray-500 mt-1">Welcome to the admin management panel</p>
                 </div>
                 <div class="flex items-center space-x-4">
                     <div class="text-right">
@@ -77,1020 +74,206 @@
             </header>
 
             <!-- Content Area -->
-            <div class="flex-1 overflow-auto">
-                <!-- Users Page -->
-                <div id="users-page" class="p-8">
-                    <!-- Search and Filter Controls -->
-                    <div class="mb-6 bg-white rounded-lg border border-gray-200 p-4">
-                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                            <!-- Search Input -->
-                            <div>
-                                <label for="search-input" class="block text-sm font-medium text-gray-700 mb-2">
-                                    Search by Email
-                                </label>
-                                <input
-                                    type="text"
-                                    id="search-input"
-                                    placeholder="Enter email to search..."
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    data-action="search"
-                                >
+            <div class="flex-1 overflow-auto p-8">
+                <!-- Dashboard Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                    <!-- User Management Card -->
+                    <div class="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0">
+                                <span class="text-3xl">👥</span>
                             </div>
-
-                            <!-- Verification Filter -->
-                            <div>
-                                <label for="verified-filter" class="block text-sm font-medium text-gray-700 mb-2">
-                                    Verification Status
-                                </label>
-                                <select
-                                    id="verified-filter"
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    data-action="filter"
-                                >
-                                    <option value="">All Users</option>
-                                    <option value="true">Verified Only</option>
-                                    <option value="false">Unverified Only</option>
-                                </select>
-                            </div>
-
-                            <!-- Admin Status Filter -->
-                            <div>
-                                <label for="admin-filter" class="block text-sm font-medium text-gray-700 mb-2">
-                                    User Type
-                                </label>
-                                <select
-                                    id="admin-filter"
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    data-action="filter"
-                                >
-                                    <option value="">All Users</option>
-                                    <option value="true">Admin Users</option>
-                                    <option value="false">Regular Users</option>
-                                </select>
-                            </div>
-
-                            <!-- Create User Button -->
-                            <div class="flex items-end">
-                                <button
-                                    class="w-full px-4 py-2 bg-blue-500 text-white rounded-md text-sm font-medium hover:bg-blue-600 transition-colors"
-                                    data-action="create-user"
-                                >
-                                    + Create User
-                                </button>
+                            <div class="ml-4">
+                                <h3 class="text-lg font-medium text-gray-900">User Management</h3>
+                                <p class="text-sm text-gray-500">Manage platform users and permissions</p>
                             </div>
                         </div>
-
-                        <!-- Active Filters Display -->
-                        <div id="active-filters" class="mt-4 flex flex-wrap gap-2 hidden">
-                            <span class="text-xs font-medium text-gray-600">Active Filters:</span>
-                            <div id="filter-badges" class="flex flex-wrap gap-2"></div>
-                            <button
-                                id="clear-filters-btn"
-                                class="ml-auto px-3 py-1 text-xs bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors"
-                                data-action="clear-filters"
-                            >
-                                Clear All
-                            </button>
+                        <div class="mt-4 flex space-x-3">
+                            <a href="/admin/users" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                                Manage Users →
+                            </a>
+                            <a href="/admin/audit" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                                View Audit Logs →
+                            </a>
                         </div>
                     </div>
 
-                    <!-- Loading State -->
-                    <div id="loading-state" class="text-center py-12">
-                        <div class="inline-block">
-                            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-                        </div>
-                        <p class="text-gray-500 mt-4">Loading users...</p>
-                    </div>
-
-                    <!-- Error State -->
-                    <div id="error-state" class="hidden bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-                        <p class="text-red-800 text-sm" id="error-message"></p>
-                    </div>
-
-                    <!-- User Table -->
-                    <div id="table-container" class="hidden bg-white rounded-lg border border-gray-200 overflow-x-auto">
-                        <table class="w-full">
-                            <thead class="bg-gray-50 border-b border-gray-200">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">ID</th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Email</th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Verified</th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Admin</th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Created</th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="users-table-body" class="divide-y divide-gray-200">
-                                <!-- Users will be inserted here -->
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <!-- Empty State -->
-                    <div id="empty-state" class="hidden text-center py-12 bg-white rounded-lg border border-gray-200">
-                        <p class="text-gray-500 text-sm">No users found</p>
-                    </div>
-
-                    <!-- Pagination Controls -->
-                    <div id="pagination-container" class="hidden mt-6 flex items-center justify-between bg-white rounded-lg border border-gray-200 p-4">
-                        <div class="text-sm text-gray-600">
-                            Showing <span id="page-start">0</span>-<span id="page-end">0</span> of <span id="total-count">0</span> users
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <button
-                                id="prev-page-btn"
-                                class="px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                                data-action="prev-page"
-                            >
-                                ← Previous
-                            </button>
-                            <div class="flex items-center space-x-2">
-                                <label for="page-size" class="text-sm text-gray-600">Per page:</label>
-                                <select
-                                    id="page-size"
-                                    class="px-2 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    data-action="page-size"
-                                >
-                                    <option value="10">10</option>
-                                    <option value="25" selected>25</option>
-                                    <option value="50">50</option>
-                                    <option value="100">100</option>
-                                </select>
+                    <!-- Test Management Card -->
+                    <div class="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0">
+                                <span class="text-3xl">📝</span>
                             </div>
-                            <button
-                                id="next-page-btn"
-                                class="px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                                data-action="next-page"
-                            >
-                                Next →
-                            </button>
+                            <div class="ml-4">
+                                <h3 class="text-lg font-medium text-gray-900">Test Management</h3>
+                                <p class="text-sm text-gray-500">Manage subjects, levels, tests, and questions</p>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex space-x-3">
+                            <a href="/admin/subjects" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                                Manage Tests →
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Quick Stats Card -->
+                    <div class="bg-white rounded-lg border border-gray-200 p-6">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0">
+                                <span class="text-3xl">📊</span>
+                            </div>
+                            <div class="ml-4">
+                                <h3 class="text-lg font-medium text-gray-900">Quick Stats</h3>
+                                <p class="text-sm text-gray-500">System overview</p>
+                            </div>
+                        </div>
+                        <div class="mt-4 space-y-2">
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-600">Total Users:</span>
+                                <span class="font-medium" id="total-users">Loading...</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-600">Admin Users:</span>
+                                <span class="font-medium" id="admin-users">Loading...</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-600">Total Subjects:</span>
+                                <span class="font-medium" id="total-subjects">Loading...</span>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Audit Logs Page -->
-                <div id="audit-page" class="hidden p-8">
-                    <!-- Audit Logs Table -->
-                    <div class="bg-white rounded-lg border border-gray-200 overflow-x-auto">
-                        <table class="w-full">
-                            <thead class="bg-gray-50 border-b border-gray-200">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">ID</th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Admin</th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Action</th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Target User</th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Status</th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Timestamp</th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Details</th>
-                                </tr>
-                            </thead>
-                            <tbody id="audit-logs-body" class="divide-y divide-gray-200">
-                                <!-- Audit logs will be inserted here -->
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <!-- Audit Pagination -->
-                    <div class="mt-6 flex items-center justify-between bg-white rounded-lg border border-gray-200 p-4">
-                        <div class="text-sm text-gray-600">
-                            Showing <span id="audit-page-start">0</span>-<span id="audit-page-end">0</span> of <span id="audit-total-count">0</span> logs
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <button
-                                id="audit-prev-page-btn"
-                                class="px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                            >
-                                ← Previous
-                            </button>
-                            <button
-                                id="audit-next-page-btn"
-                                class="px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                            >
-                                Next →
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Test Management Page -->
-                <div id="test-management-page" class="hidden p-8">
-                    <!-- Breadcrumb Navigation -->
-                    <div id="test-breadcrumb" class="mb-6 bg-white rounded-lg border border-gray-200 p-4">
-                        <nav class="flex" aria-label="Breadcrumb">
-                            <ol class="flex items-center space-x-2 text-sm">
-                                <li>
-                                    <button class="text-blue-600 hover:text-blue-800 font-medium" onclick="testMgmt.navigateToSubjects()">
-                                        Subjects
-                                    </button>
-                                </li>
-                                <li id="breadcrumb-level" class="hidden">
-                                    <span class="text-gray-400 mx-2">›</span>
-                                    <button class="text-blue-600 hover:text-blue-800 font-medium" onclick="testMgmt.navigateToLevels()">
-                                        <span id="breadcrumb-level-text">Level</span>
-                                    </button>
-                                </li>
-                                <li id="breadcrumb-test" class="hidden">
-                                    <span class="text-gray-400 mx-2">›</span>
-                                    <button class="text-blue-600 hover:text-blue-800 font-medium" onclick="testMgmt.navigateToTests()">
-                                        <span id="breadcrumb-test-text">Test</span>
-                                    </button>
-                                </li>
-                                <li id="breadcrumb-question" class="hidden">
-                                    <span class="text-gray-400 mx-2">›</span>
-                                    <span class="text-gray-600 font-medium">Questions</span>
-                                </li>
-                            </ol>
-                        </nav>
-                    </div>
-
-                    <!-- Toolbar -->
-                    <div class="mb-6 bg-white rounded-lg border border-gray-200 p-4 flex items-center justify-between">
-                        <h3 class="text-lg font-semibold text-gray-900" id="test-toolbar-title">Test Management</h3>
-                        <button
-                            id="test-toolbar-btn"
-                            class="px-4 py-2 bg-blue-500 text-white rounded-md text-sm font-medium hover:bg-blue-600 transition-colors"
-                            data-action="create-subject"
-                        >
-                            + Create Subject
+                <!-- Quick Actions -->
+                <div class="bg-white rounded-lg border border-gray-200 p-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Quick Actions</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <button onclick="window.location.href='/admin/users'" class="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                            <span class="mr-2">👥</span>
+                            Create User
                         </button>
-                    </div>
-
-                    <!-- Search Controls -->
-                    <div id="test-search-controls" class="mb-6 bg-white rounded-lg border border-gray-200 p-4">
-                        <div class="flex items-center gap-4">
-                            <div class="flex-1">
-                                <label for="test-search-input" class="block text-sm font-medium text-gray-700 mb-2">
-                                    Search
-                                </label>
-                                <input
-                                    type="text"
-                                    id="test-search-input"
-                                    placeholder="Search by name..."
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                >
-                            </div>
-                            <div class="flex gap-2 pt-6">
-                                <button
-                                    type="button"
-                                    id="test-search-btn"
-                                    class="px-4 py-2 bg-blue-500 text-white rounded-md text-sm font-medium hover:bg-blue-600 transition-colors"
-                                >
-                                    Search
-                                </button>
-                                <button
-                                    type="button"
-                                    id="test-clear-search-btn"
-                                    class="px-4 py-2 border border-gray-300 text-gray-700 rounded-md text-sm font-medium hover:bg-gray-50 transition-colors"
-                                >
-                                    Clear
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Main Content Area -->
-                    <div id="test-content" class="bg-white rounded-lg border border-gray-200 overflow-x-auto">
-                        <!-- Subjects Table -->
-                        <table id="subjects-table" class="w-full">
-                            <thead class="bg-gray-50 border-b border-gray-200">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">ID</th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Name</th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Created</th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="subjects-table-body" class="divide-y divide-gray-200">
-                                <!-- Subjects will be inserted here -->
-                            </tbody>
-                        </table>
-
-                        <!-- Levels Table -->
-                        <table id="levels-table" class="hidden w-full">
-                            <thead class="bg-gray-50 border-b border-gray-200">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">ID</th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Name</th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="levels-table-body" class="divide-y divide-gray-200">
-                                <!-- Levels will be inserted here -->
-                            </tbody>
-                        </table>
-
-                        <!-- Tests Table -->
-                        <table id="tests-table" class="hidden w-full">
-                            <thead class="bg-gray-50 border-b border-gray-200">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">ID</th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Name</th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Start Date</th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">End Date</th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tests-table-body" class="divide-y divide-gray-200">
-                                <!-- Tests will be inserted here -->
-                            </tbody>
-                        </table>
-
-                        <!-- Questions Table -->
-                        <table id="questions-table" class="hidden w-full">
-                            <thead class="bg-gray-50 border-b border-gray-200">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">ID</th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Text</th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Correct Answer</th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Options Count</th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="questions-table-body" class="divide-y divide-gray-200">
-                                <!-- Questions will be inserted here -->
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <!-- Pagination Controls -->
-                    <div id="test-pagination" class="mt-6 flex items-center justify-between bg-white rounded-lg border border-gray-200 p-4">
-                        <div class="text-sm text-gray-600">
-                            Showing <span id="test-page-start">0</span>-<span id="test-page-end">0</span> of <span id="test-total-count">0</span> items
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <button
-                                id="test-prev-page-btn"
-                                class="px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                                data-action="test-prev-page"
-                            >
-                                ← Previous
-                            </button>
-                            <button
-                                id="test-next-page-btn"
-                                class="px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                                data-action="test-next-page"
-                            >
-                                Next →
-                            </button>
-                        </div>
+                        <button onclick="window.location.href='/admin/subjects'" class="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                            <span class="mr-2">📝</span>
+                            Create Subject
+                        </button>
+                        <button onclick="window.location.href='/admin/audit'" class="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                            <span class="mr-2">📋</span>
+                            View Audit Logs
+                        </button>
+                        <button onclick="window.location.href='/admin/users'" class="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                            <span class="mr-2">⚙️</span>
+                            User Settings
+                        </button>
                     </div>
                 </div>
             </div>
         </main>
     </div>
 
-    <!-- Create User Modal -->
-    <div id="create-user-modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
-            <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-                <h3 class="text-lg font-semibold text-gray-900">Create New User</h3>
-                <button class="text-gray-400 hover:text-gray-600" data-action="close-modal" data-modal="create-user-modal">
-                    ✕
-                </button>
-            </div>
-            <form id="create-user-form" class="p-6 space-y-4">
-                <div>
-                    <label for="create-email" class="block text-sm font-medium text-gray-700 mb-1">
-                        Email Address
-                    </label>
-                    <input
-                        type="email"
-                        id="create-email"
-                        name="email"
-                        required
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="user@example.com"
-                    >
-                </div>
-                <div>
-                    <label for="create-password" class="block text-sm font-medium text-gray-700 mb-1">
-                        Password
-                    </label>
-                    <input
-                        type="password"
-                        id="create-password"
-                        name="password"
-                        required
-                        minlength="8"
-                        maxlength="100"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Minimum 8 characters"
-                    >
-                    <p class="text-xs text-gray-500 mt-1">Must be at least 8 characters</p>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <label class="flex items-center">
-                        <input
-                            type="checkbox"
-                            id="create-verified"
-                            name="is_verified"
-                            class="w-4 h-4 text-blue-500 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
-                        >
-                        <span class="ml-2 text-sm text-gray-700">Mark as Verified</span>
-                    </label>
-                    <label class="flex items-center">
-                        <input
-                            type="checkbox"
-                            id="create-admin"
-                            name="is_admin"
-                            class="w-4 h-4 text-blue-500 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
-                        >
-                        <span class="ml-2 text-sm text-gray-700">Admin User</span>
-                    </label>
-                </div>
-                <div class="flex space-x-3 pt-4">
-                    <button
-                        type="button"
-                        class="flex-1 px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-                        data-action="close-modal"
-                        data-modal="create-user-modal"
-                    >
-                        Cancel
-                    </button>
-                    <button
-                        type="submit"
-                        class="flex-1 px-4 py-2 bg-blue-500 text-white rounded-md text-sm font-medium hover:bg-blue-600 transition-colors"
-                    >
-                        Create User
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Edit User Modal -->
-    <div id="edit-user-modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
-            <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-                <h3 class="text-lg font-semibold text-gray-900">Edit User</h3>
-                <button class="text-gray-400 hover:text-gray-600" data-action="close-modal" data-modal="edit-user-modal">
-                    ✕
-                </button>
-            </div>
-            <form id="edit-user-form" class="p-6 space-y-4">
-                <input type="hidden" id="edit-user-id" name="user_id">
-                <div>
-                    <label for="edit-email" class="block text-sm font-medium text-gray-700 mb-1">
-                        Email Address
-                    </label>
-                    <input
-                        type="email"
-                        id="edit-email"
-                        name="email"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="user@example.com"
-                    >
-                </div>
-                <div>
-                    <label for="edit-password" class="block text-sm font-medium text-gray-700 mb-1">
-                        Password (leave blank to keep current)
-                    </label>
-                    <input
-                        type="password"
-                        id="edit-password"
-                        name="password"
-                        minlength="8"
-                        maxlength="100"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Leave blank to keep current password"
-                    >
-                    <p class="text-xs text-gray-500 mt-1">Must be at least 8 characters if provided</p>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <label class="flex items-center">
-                        <input
-                            type="checkbox"
-                            id="edit-verified"
-                            name="is_verified"
-                            class="w-4 h-4 text-blue-500 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
-                        >
-                        <span class="ml-2 text-sm text-gray-700">Verified</span>
-                    </label>
-                    <label class="flex items-center">
-                        <input
-                            type="checkbox"
-                            id="edit-admin"
-                            name="is_admin"
-                            class="w-4 h-4 text-blue-500 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
-                        >
-                        <span class="ml-2 text-sm text-gray-700">Admin User</span>
-                    </label>
-                </div>
-                <div class="flex space-x-3 pt-4">
-                    <button
-                        type="button"
-                        class="flex-1 px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-                        data-action="close-modal"
-                        data-modal="edit-user-modal"
-                    >
-                        Cancel
-                    </button>
-                    <button
-                        type="submit"
-                        class="flex-1 px-4 py-2 bg-blue-500 text-white rounded-md text-sm font-medium hover:bg-blue-600 transition-colors"
-                    >
-                        Update User
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Delete Confirmation Modal -->
-    <div id="delete-user-modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
-            <div class="px-6 py-4 border-b border-gray-200">
-                <h3 class="text-lg font-semibold text-gray-900">Delete User</h3>
-            </div>
-            <div class="p-6">
-                <p class="text-gray-700 mb-2">Are you sure you want to delete this user?</p>
-                <p class="text-sm text-gray-500 mb-4">
-                    <strong id="delete-user-email"></strong>
-                </p>
-                <p class="text-sm text-red-600 mb-6">This action cannot be undone.</p>
-                <div class="flex space-x-3">
-                    <button
-                        type="button"
-                        class="flex-1 px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-                        data-action="close-modal"
-                        data-modal="delete-user-modal"
-                    >
-                        Cancel
-                    </button>
-                    <button
-                        type="button"
-                        class="flex-1 px-4 py-2 bg-red-500 text-white rounded-md text-sm font-medium hover:bg-red-600 transition-colors"
-                        data-action="confirm-delete"
-                    >
-                        Delete User
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Non-Admin Modal -->
-    <div id="non-admin-modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
-            <div class="px-6 py-4 border-b border-gray-200">
-                <h3 class="text-lg font-semibold text-gray-900">Access Denied</h3>
-            </div>
-            <div class="p-6">
-                <p class="text-gray-700 mb-4">You do not have admin privileges to access this panel. Only administrators can manage users. Please contact your system administrator if you believe this is an error.</p>
-                <div class="flex">
-                    <button
-                        type="button"
-                        class="w-full px-4 py-2 bg-blue-500 text-white rounded-md text-sm font-medium hover:bg-blue-600 transition-colors"
-                        data-action="logout-from-modal"
-                    >
-                        Logout
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Audit Details Modal -->
-    <div id="audit-details-modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
-            <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-                <h3 class="text-lg font-semibold text-gray-900">Audit Log Details</h3>
-                <button class="text-gray-400 hover:text-gray-600" data-action="close-modal" data-modal="audit-details-modal">
-                    ✕
-                </button>
-            </div>
-            <div class="p-6 space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Log ID</label>
-                    <p class="text-sm text-gray-900" id="audit-details-id">-</p>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Admin Email</label>
-                    <p class="text-sm text-gray-900" id="audit-details-admin">-</p>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Action</label>
-                    <p class="text-sm text-gray-900" id="audit-details-action">-</p>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Target User</label>
-                    <p class="text-sm text-gray-900" id="audit-details-target">-</p>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                    <p class="text-sm text-gray-900" id="audit-details-status">-</p>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Timestamp</label>
-                    <p class="text-sm text-gray-900" id="audit-details-timestamp">-</p>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Details</label>
-                    <p class="text-sm text-gray-900 break-words" id="audit-details-details">-</p>
-                </div>
-                <div class="flex pt-4">
-                    <button
-                        type="button"
-                        class="w-full px-4 py-2 bg-blue-500 text-white rounded-md text-sm font-medium hover:bg-blue-600 transition-colors"
-                        data-action="close-modal"
-                        data-modal="audit-details-modal"
-                    >
-                        Close
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Create Subject Modal -->
-    <div id="create-subject-modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
-            <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-                <div>
-                    <h3 class="text-lg font-semibold text-gray-900">Create New Subject</h3>
-                    <p class="text-xs text-gray-500 mt-1">Add a new subject to the system</p>
-                </div>
-                <button class="text-gray-400 hover:text-gray-600" data-action="close-modal" data-modal="create-subject-modal">
-                    ✕
-                </button>
-            </div>
-            <form id="create-subject-form" class="p-6 space-y-4">
-                <div>
-                    <label for="subject-name" class="block text-sm font-medium text-gray-700 mb-2">
-                        Subject Name
-                    </label>
-                    <input
-                        type="text"
-                        id="subject-name"
-                        name="name"
-                        required
-                        class="w-full px-4 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="e.g., Mathematics, Science, English"
-                    >
-                </div>
-                <div class="flex space-x-3 pt-4">
-                    <button
-                        type="button"
-                        class="flex-1 px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-                        data-action="close-modal"
-                        data-modal="create-subject-modal"
-                    >
-                        Cancel
-                    </button>
-                    <button
-                        type="submit"
-                        class="flex-1 px-4 py-2 bg-blue-500 text-white rounded-md text-sm font-medium hover:bg-blue-600 transition-colors"
-                    >
-                        Create Subject
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Create Level Modal -->
-    <div id="create-level-modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
-            <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-                <div>
-                    <h3 class="text-lg font-semibold text-gray-900">Create New Level</h3>
-                    <p class="text-xs text-gray-500 mt-1">Add a new difficulty level</p>
-                </div>
-                <button class="text-gray-400 hover:text-gray-600" data-action="close-modal" data-modal="create-level-modal">
-                    ✕
-                </button>
-            </div>
-            <form id="create-level-form" class="p-6 space-y-4">
-                <div>
-                    <label for="level-name" class="block text-sm font-medium text-gray-700 mb-2">
-                        Level Name
-                    </label>
-                    <input
-                        type="text"
-                        id="level-name"
-                        name="name"
-                        required
-                        class="w-full px-4 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="e.g., Beginner, Intermediate, Advanced"
-                    >
-                </div>
-                <div class="flex space-x-3 pt-4">
-                    <button
-                        type="button"
-                        class="flex-1 px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-                        data-action="close-modal"
-                        data-modal="create-level-modal"
-                    >
-                        Cancel
-                    </button>
-                    <button
-                        type="submit"
-                        class="flex-1 px-4 py-2 bg-blue-500 text-white rounded-md text-sm font-medium hover:bg-blue-600 transition-colors"
-                    >
-                        Create Level
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Create Test Modal -->
-    <div id="create-test-modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
-            <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-                <div>
-                    <h3 class="text-lg font-semibold text-gray-900">Create New Test</h3>
-                    <p class="text-xs text-gray-500 mt-1">Set up a new test with dates</p>
-                </div>
-                <button class="text-gray-400 hover:text-gray-600" data-action="close-modal" data-modal="create-test-modal">
-                    ✕
-                </button>
-            </div>
-            <form id="create-test-form" class="p-6 space-y-4">
-                <div>
-                    <label for="test-name" class="block text-sm font-medium text-gray-700 mb-2">
-                        Test Name
-                    </label>
-                    <input
-                        type="text"
-                        id="test-name"
-                        name="name"
-                        required
-                        class="w-full px-4 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="e.g., Midterm Exam, Quiz 1"
-                    >
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label for="test-start-date" class="block text-sm font-medium text-gray-700 mb-2">
-                            Start Date & Time
-                        </label>
-                        <input
-                            type="datetime-local"
-                            id="test-start-date"
-                            name="start_date"
-                            class="w-full px-4 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        >
-                        <p class="text-xs text-gray-500 mt-1">Optional</p>
-                    </div>
-                    <div>
-                        <label for="test-end-date" class="block text-sm font-medium text-gray-700 mb-2">
-                            End Date & Time
-                        </label>
-                        <input
-                            type="datetime-local"
-                            id="test-end-date"
-                            name="end_date"
-                            class="w-full px-4 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        >
-                        <p class="text-xs text-gray-500 mt-1">Optional</p>
-                    </div>
-                </div>
-                <div id="test-date-feedback" class="hidden text-xs text-amber-600 bg-amber-50 p-2 rounded"></div>
-                <div class="flex space-x-3 pt-4">
-                    <button
-                        type="button"
-                        class="flex-1 px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-                        data-action="close-modal"
-                        data-modal="create-test-modal"
-                    >
-                        Cancel
-                    </button>
-                    <button
-                        type="submit"
-                        class="flex-1 px-4 py-2 bg-blue-500 text-white rounded-md text-sm font-medium hover:bg-blue-600 transition-colors"
-                    >
-                        Create Test
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Create Question Modal -->
-    <div id="create-question-modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-            <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between sticky top-0 bg-white">
-                <div>
-                    <h3 class="text-lg font-semibold text-gray-900">Create New Question</h3>
-                    <p class="text-xs text-gray-500 mt-1">Add a multiple-choice question with options</p>
-                </div>
-                <button class="text-gray-400 hover:text-gray-600" data-action="close-modal" data-modal="create-question-modal">
-                    ✕
-                </button>
-            </div>
-            <form id="create-question-form" class="p-6 space-y-6">
-                <!-- Question Text -->
-                <div>
-                    <label for="question-text" class="block text-sm font-medium text-gray-700 mb-2">
-                        Question Text
-                    </label>
-                    <textarea
-                        id="question-text"
-                        name="text"
-                        required
-                        rows="4"
-                        class="w-full px-4 py-3 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                        placeholder="Enter the complete question text here..."
-                    ></textarea>
-                    <p class="text-xs text-gray-500 mt-1">Be clear and specific</p>
-                </div>
-
-                <!-- Correct Answer Selector -->
-                <div>
-                    <label for="question-correct-answer" class="block text-sm font-medium text-gray-700 mb-2">
-                        Correct Answer
-                    </label>
-                    <select
-                        id="question-correct-answer"
-                        name="correct_answer"
-                        required
-                        class="w-full px-4 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                        <option value="">Select the correct answer...</option>
-                        <option value="A">A</option>
-                        <option value="B">B</option>
-                        <option value="C">C</option>
-                        <option value="D">D</option>
-                        <option value="E">E</option>
-                        <option value="F">F</option>
-                        <option value="G">G</option>
-                        <option value="H">H</option>
-                        <option value="I">I</option>
-                        <option value="J">J</option>
-                    </select>
-                    <p class="text-xs text-gray-500 mt-1">This will be updated as you add options</p>
-                </div>
-
-                <!-- Options Section -->
-                <div class="border-t pt-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Answer Options</label>
-                            <p class="text-xs text-gray-500 mt-1">Minimum 3 options required</p>
-                        </div>
-                        <button
-                            type="button"
-                            id="add-option-btn"
-                            class="px-3 py-1 bg-green-100 text-green-700 rounded text-xs font-medium hover:bg-green-200 transition-colors"
-                            onclick="testMgmt.addOption()"
-                        >
-                            + Add Option
-                        </button>
-                    </div>
-
-                    <!-- Options List -->
-                    <div id="options-container" class="space-y-3">
-                        <!-- Options will be dynamically inserted here -->
-                    </div>
-                </div>
-
-                <!-- Validation Feedback -->
-                <div id="question-validation-feedback" class="hidden text-xs p-3 rounded"></div>
-
-                <!-- Form Actions -->
-                <div class="flex space-x-3 pt-4 border-t">
-                    <button
-                        type="button"
-                        class="flex-1 px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-                        data-action="close-modal"
-                        data-modal="create-question-modal"
-                    >
-                        Cancel
-                    </button>
-                    <button
-                        type="submit"
-                        class="flex-1 px-4 py-2 bg-blue-500 text-white rounded-md text-sm font-medium hover:bg-blue-600 transition-colors"
-                    >
-                        Create Question
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Edit Subject Modal -->
-    <div id="edit-subject-modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
-            <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-                <h3 class="text-lg font-semibold text-gray-900">Edit Subject</h3>
-                <button class="text-gray-400 hover:text-gray-600" data-action="close-modal" data-modal="edit-subject-modal">✕</button>
-            </div>
-            <form id="edit-subject-form" class="p-6">
-                <div class="mb-4">
-                    <label for="edit-subject-name" class="block text-sm font-medium text-gray-700 mb-2">Subject Name</label>
-                    <input type="text" id="edit-subject-name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                </div>
-                <div class="flex gap-3">
-                    <button type="button" class="flex-1 px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50" data-action="close-modal" data-modal="edit-subject-modal">Cancel</button>
-                    <button type="submit" class="flex-1 px-4 py-2 bg-blue-500 text-white rounded-md text-sm font-medium hover:bg-blue-600">Update Subject</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Edit Level Modal -->
-    <div id="edit-level-modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
-            <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-                <h3 class="text-lg font-semibold text-gray-900">Edit Level</h3>
-                <button class="text-gray-400 hover:text-gray-600" data-action="close-modal" data-modal="edit-level-modal">✕</button>
-            </div>
-            <form id="edit-level-form" class="p-6">
-                <div class="mb-4">
-                    <label for="edit-level-name" class="block text-sm font-medium text-gray-700 mb-2">Level Name</label>
-                    <input type="text" id="edit-level-name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                </div>
-                <div class="flex gap-3">
-                    <button type="button" class="flex-1 px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50" data-action="close-modal" data-modal="edit-level-modal">Cancel</button>
-                    <button type="submit" class="flex-1 px-4 py-2 bg-blue-500 text-white rounded-md text-sm font-medium hover:bg-blue-600">Update Level</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Edit Test Modal -->
-    <div id="edit-test-modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
-            <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-                <h3 class="text-lg font-semibold text-gray-900">Edit Test</h3>
-                <button class="text-gray-400 hover:text-gray-600" data-action="close-modal" data-modal="edit-test-modal">✕</button>
-            </div>
-            <form id="edit-test-form" class="p-6">
-                <div class="mb-4">
-                    <label for="edit-test-name" class="block text-sm font-medium text-gray-700 mb-2">Test Name</label>
-                    <input type="text" id="edit-test-name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                </div>
-                <div class="mb-4">
-                    <label for="edit-test-start-date" class="block text-sm font-medium text-gray-700 mb-2">Start Date (Optional)</label>
-                    <input type="date" id="edit-test-start-date" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                </div>
-                <div class="mb-4">
-                    <label for="edit-test-end-date" class="block text-sm font-medium text-gray-700 mb-2">End Date (Optional)</label>
-                    <input type="date" id="edit-test-end-date" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                </div>
-                <div class="flex gap-3">
-                    <button type="button" class="flex-1 px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50" data-action="close-modal" data-modal="edit-test-modal">Cancel</button>
-                    <button type="submit" class="flex-1 px-4 py-2 bg-blue-500 text-white rounded-md text-sm font-medium hover:bg-blue-600">Update Test</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Edit Question Modal -->
-    <div id="edit-question-modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-            <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between sticky top-0 bg-white">
-                <div>
-                    <h3 class="text-lg font-semibold text-gray-900">Edit Question</h3>
-                    <p class="text-xs text-gray-500 mt-1">Update the multiple-choice question and options</p>
-                </div>
-                <button class="text-gray-400 hover:text-gray-600" data-action="close-modal" data-modal="edit-question-modal">✕</button>
-            </div>
-            <form id="edit-question-form" class="p-6 space-y-6">
-                <div>
-                    <label for="edit-question-text" class="block text-sm font-medium text-gray-700 mb-2">Question Text</label>
-                    <textarea id="edit-question-text" rows="3" class="w-full px-4 py-3 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-vertical" placeholder="Enter your question here..." required></textarea>
-                </div>
-                
-                <div>
-                    <div class="flex items-center justify-between mb-3">
-                        <label class="block text-sm font-medium text-gray-700">Answer Options</label>
-                        <div class="flex gap-2">
-                            <button type="button" id="edit-add-option-btn" class="px-3 py-1 bg-green-100 text-green-700 rounded text-xs font-medium hover:bg-green-200 transition-colors">+ Add Option</button>
-                        </div>
-                    </div>
-                    <div id="edit-options-container" class="space-y-3"></div>
-                </div>
-                
-                <div>
-                    <label for="edit-question-correct-answer" class="block text-sm font-medium text-gray-700 mb-2">Correct Answer</label>
-                    <select id="edit-question-correct-answer" class="w-full px-4 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
-                        <option value="">Select the correct answer</option>
-                    </select>
-                </div>
-                
-                <div id="edit-question-validation-feedback" class="hidden"></div>
-                
-                <div class="flex gap-3 pt-4 border-t border-gray-200">
-                    <button type="button" class="flex-1 px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors" data-action="close-modal" data-modal="edit-question-modal">Cancel</button>
-                    <button type="submit" class="flex-1 px-4 py-2 bg-blue-500 text-white rounded-md text-sm font-medium hover:bg-blue-600 transition-colors">Update Question</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
     <!-- Toast Notification Container -->
     <div id="toast-container" class="fixed top-4 right-4 space-y-2 z-40 pointer-events-none"></div>
 
     <!-- JavaScript Modules -->
+    <script src="/static/admin/js/mobile-menu.js"></script>
     <script src="/static/admin/js/state.js"></script>
     <script src="/static/admin/js/api-client.js"></script>
     <script src="/static/admin/js/ui-utils.js"></script>
     <script src="/static/admin/js/user-management.js"></script>
-    <script src="/static/admin/js/audit-management.js"></script>
+    <script src="/static/admin/js/audit.js"></script>
     <script src="/static/admin/js/event-handlers.js"></script>
     <script src="/static/admin/js/init.js"></script>
-    <script src="/static/admin/js/test-management.js"></script>
+    
+    <script>
+        // Dashboard initialization
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Load current user info
+            try {
+                const response = await fetch('/api/auth/me', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+                    }
+                });
+
+                if (response.ok) {
+                    const user = await response.json();
+                    const emailElement = document.getElementById('current-user-email');
+                    if (emailElement) {
+                        emailElement.textContent = user.email;
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading current user:', error);
+            }
+            
+            // Load quick stats
+            loadQuickStats();
+            
+            // Setup logout
+            const logoutBtn = document.querySelector('[data-action="logout"]');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', async () => {
+                    try {
+                        await fetch('/api/auth/logout', {
+                            method: 'POST',
+                            headers: {
+                                'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+                            }
+                        });
+                    } catch (error) {
+                        console.error('Logout error:', error);
+                    } finally {
+                        localStorage.removeItem('access_token');
+                        window.location.href = '/admin/login';
+                    }
+                });
+            }
+        });
+        
+        async function loadQuickStats() {
+            try {
+                // Load user stats
+                const usersResponse = await fetch('/api/admin/users?size=1', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+                    }
+                });
+                
+                if (usersResponse.ok) {
+                    const usersData = await usersResponse.json();
+                    document.getElementById('total-users').textContent = usersData.total || 0;
+                }
+                
+                // Load admin user stats
+                const adminUsersResponse = await fetch('/api/admin/users?admin=true&size=1', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+                    }
+                });
+                
+                if (adminUsersResponse.ok) {
+                    const adminUsersData = await adminUsersResponse.json();
+                    document.getElementById('admin-users').textContent = adminUsersData.total || 0;
+                }
+                
+                // Load subjects stats
+                const subjectsResponse = await fetch('/api/test-management/subjects?size=1', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+                    }
+                });
+                
+                if (subjectsResponse.ok) {
+                    const subjectsData = await subjectsResponse.json();
+                    document.getElementById('total-subjects').textContent = subjectsData.total || 0;
+                }
+                
+            } catch (error) {
+                console.error('Error loading stats:', error);
+                document.getElementById('total-users').textContent = 'Error';
+                document.getElementById('admin-users').textContent = 'Error';
+                document.getElementById('total-subjects').textContent = 'Error';
+            }
+        }
+    </script>
 </body>
 </html>

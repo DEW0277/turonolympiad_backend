@@ -254,6 +254,10 @@ async def create_user(
     """
     from app.services.audit_service import AuditService
     
+    # Eagerly load admin attributes to avoid lazy loading issues in exception handlers
+    admin_id = current_admin.id
+    admin_email = current_admin.email
+    
     user_repo = UserRepository(db)
     password_service = PasswordService()
     admin_service = AdminService(user_repo, password_service)
@@ -269,8 +273,8 @@ async def create_user(
         
         # Log successful action
         await audit_service.log_user_creation(
-            admin_id=current_admin.id,
-            admin_email=current_admin.email,
+            admin_id=admin_id,
+            admin_email=admin_email,
             target_user_id=user.id,
             target_user_email=user.email,
             success=True
@@ -286,8 +290,8 @@ async def create_user(
         await db.rollback()
         # Log failed action
         await audit_service.log_user_creation(
-            admin_id=current_admin.id,
-            admin_email=current_admin.email,
+            admin_id=admin_id,
+            admin_email=admin_email,
             target_user_id=0,
             target_user_email=request.email,
             success=False,
@@ -363,6 +367,10 @@ async def update_user(
     """
     from app.services.audit_service import AuditService
     
+    # Eagerly load admin attributes to avoid lazy loading issues in exception handlers
+    admin_id = current_admin.id
+    admin_email = current_admin.email
+    
     user_repo = UserRepository(db)
     password_service = PasswordService()
     admin_service = AdminService(user_repo, password_service)
@@ -379,8 +387,8 @@ async def update_user(
         
         # Log successful action
         await audit_service.log_user_update(
-            admin_id=current_admin.id,
-            admin_email=current_admin.email,
+            admin_id=admin_id,
+            admin_email=admin_email,
             target_user_id=user.id,
             target_user_email=user.email,
             success=True
@@ -396,8 +404,8 @@ async def update_user(
         await db.rollback()
         # Log failed action
         await audit_service.log_user_update(
-            admin_id=current_admin.id,
-            admin_email=current_admin.email,
+            admin_id=admin_id,
+            admin_email=admin_email,
             target_user_id=user_id,
             target_user_email="",
             success=False,
@@ -452,6 +460,10 @@ async def delete_user(
     """
     from app.services.audit_service import AuditService
     
+    # Eagerly load admin attributes to avoid lazy loading issues in exception handlers
+    admin_id = current_admin.id
+    admin_email = current_admin.email
+    
     user_repo = UserRepository(db)
     password_service = PasswordService()
     admin_service = AdminService(user_repo, password_service)
@@ -461,12 +473,12 @@ async def delete_user(
         # Get user before deletion for audit log
         user = await admin_service.get_user_by_id(user_id)
         
-        await admin_service.delete_user(user_id, current_admin.id)
+        await admin_service.delete_user(user_id, admin_id)
         
         # Log successful action
         await audit_service.log_user_deletion(
-            admin_id=current_admin.id,
-            admin_email=current_admin.email,
+            admin_id=admin_id,
+            admin_email=admin_email,
             target_user_id=user.id,
             target_user_email=user.email,
             success=True
@@ -482,8 +494,8 @@ async def delete_user(
         await db.rollback()
         # Log failed action
         await audit_service.log_user_deletion(
-            admin_id=current_admin.id,
-            admin_email=current_admin.email,
+            admin_id=admin_id,
+            admin_email=admin_email,
             target_user_id=user_id,
             target_user_email="",
             success=False,
@@ -537,6 +549,10 @@ async def toggle_verification(
     """
     from app.services.audit_service import AuditService
     
+    # Eagerly load admin attributes to avoid lazy loading issues in exception handlers
+    admin_id = current_admin.id
+    admin_email = current_admin.email
+    
     user_repo = UserRepository(db)
     password_service = PasswordService()
     admin_service = AdminService(user_repo, password_service)
@@ -547,8 +563,8 @@ async def toggle_verification(
         
         # Log successful action
         await audit_service.log_verification_toggle(
-            admin_id=current_admin.id,
-            admin_email=current_admin.email,
+            admin_id=admin_id,
+            admin_email=admin_email,
             target_user_id=user.id,
             target_user_email=user.email,
             success=True,
@@ -565,8 +581,8 @@ async def toggle_verification(
         await db.rollback()
         # Log failed action
         await audit_service.log_verification_toggle(
-            admin_id=current_admin.id,
-            admin_email=current_admin.email,
+            admin_id=admin_id,
+            admin_email=admin_email,
             target_user_id=user_id,
             target_user_email="",
             success=False,

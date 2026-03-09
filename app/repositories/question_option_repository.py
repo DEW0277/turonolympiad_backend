@@ -31,15 +31,21 @@ class QuestionOptionRepository(BaseRepository[QuestionOption]):
     async def create(
         self, 
         question_id: int, 
-        label: str, 
-        text: str
+        label: str,
+        text_en: str = None,
+        text_uz: str = None,
+        text_ru: str = None,
+        text: str = None
     ) -> QuestionOption:
         """Create a new question option record.
         
         Args:
             question_id: ID of the parent question
             label: Option label (A, B, C, or D)
-            text: Option text content
+            text_en: Option text in English
+            text_uz: Option text in Uzbek
+            text_ru: Option text in Russian
+            text: Legacy option text (for backward compatibility)
             
         Returns:
             Created QuestionOption instance with all fields populated
@@ -50,6 +56,9 @@ class QuestionOptionRepository(BaseRepository[QuestionOption]):
         return await super().create(
             question_id=question_id,
             label=label,
+            text_en=text_en,
+            text_uz=text_uz,
+            text_ru=text_ru,
             text=text
         )
     

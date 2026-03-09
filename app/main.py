@@ -258,37 +258,132 @@ async def serve_403_page() -> FileResponse:
     )
 
 
-# Add admin panel route (GET /admin)
+# Add admin panel route (GET /admin) - redirect to users page
 @app.get("/admin", include_in_schema=False)
 async def serve_admin_panel(
     current_admin: Annotated[User, Depends(get_current_admin_user)] = None,
-) -> FileResponse:
+) -> RedirectResponse:
     """
-    Serve the admin panel HTML interface.
-    
-    Returns the admin panel HTML file for authenticated admin users.
-    The admin panel provides a web-based interface for managing platform users.
+    Redirect to the users management page as the default admin page.
     
     **Requirements:**
     - 1.1: Serve admin panel HTML interface at /admin
     - 1.2: Redirect non-authenticated users to login with 401
     - 1.3: Deny non-admin users with 403
-    - 1.4: Display professional interface with minimal color palette
-    - 1.5: Display navigation sidebar with extensible structure
     - 9.1: Non-admin users cannot access
     - 9.2: Unauthenticated users cannot access
     - 9.3: Verify admin status from database
     """
-    # Get the path to the admin HTML file
-    admin_html_path = Path(__file__).parent / "static" / "admin" / "index.html"
+    return RedirectResponse(url="/admin/users", status_code=302)
+
+
+# Test Management Page Routes
+@app.get("/admin/users", include_in_schema=False)
+async def serve_users_page(
+    current_admin: Annotated[User, Depends(get_current_admin_user)] = None,
+) -> FileResponse:
+    """
+    Serve the users management page.
     
-    # Serve the HTML file with proper content-type
+    Provides interface for managing platform users with CRUD operations.
+    Requires admin authentication.
+    """
+    users_html_path = Path(__file__).parent / "static" / "admin" / "users.html"
     return FileResponse(
-        path=admin_html_path,
+        path=users_html_path,
         media_type="text/html",
         status_code=200
     )
 
+
+@app.get("/admin/audit", include_in_schema=False)
+async def serve_audit_page(
+    current_admin: Annotated[User, Depends(get_current_admin_user)] = None,
+) -> FileResponse:
+    """
+    Serve the audit logs page.
+    
+    Provides interface for viewing system audit logs and user actions.
+    Requires admin authentication.
+    """
+    audit_html_path = Path(__file__).parent / "static" / "admin" / "audit.html"
+    return FileResponse(
+        path=audit_html_path,
+        media_type="text/html",
+        status_code=200
+    )
+
+
+@app.get("/admin/subjects", include_in_schema=False)
+async def serve_subjects_page(
+    current_admin: Annotated[User, Depends(get_current_admin_user)] = None,
+) -> FileResponse:
+    """
+    Serve the subjects management page.
+    
+    Provides interface for managing test subjects with multi-language support.
+    Requires admin authentication.
+    """
+    subjects_html_path = Path(__file__).parent / "static" / "admin" / "subjects.html"
+    return FileResponse(
+        path=subjects_html_path,
+        media_type="text/html",
+        status_code=200
+    )
+
+
+@app.get("/admin/levels", include_in_schema=False)
+async def serve_levels_page(
+    current_admin: Annotated[User, Depends(get_current_admin_user)] = None,
+) -> FileResponse:
+    """
+    Serve the levels management page.
+    
+    Provides interface for managing test levels with multi-language support.
+    Requires admin authentication.
+    """
+    levels_html_path = Path(__file__).parent / "static" / "admin" / "levels.html"
+    return FileResponse(
+        path=levels_html_path,
+        media_type="text/html",
+        status_code=200
+    )
+
+
+@app.get("/admin/tests", include_in_schema=False)
+async def serve_tests_page(
+    current_admin: Annotated[User, Depends(get_current_admin_user)] = None,
+) -> FileResponse:
+    """
+    Serve the tests management page.
+    
+    Provides interface for managing tests with pricing, dates, and multi-language support.
+    Requires admin authentication.
+    """
+    tests_html_path = Path(__file__).parent / "static" / "admin" / "tests.html"
+    return FileResponse(
+        path=tests_html_path,
+        media_type="text/html",
+        status_code=200
+    )
+
+
+@app.get("/admin/questions", include_in_schema=False)
+async def serve_questions_page(
+    current_admin: Annotated[User, Depends(get_current_admin_user)] = None,
+) -> FileResponse:
+    """
+    Serve the questions management page.
+    
+    Provides interface for managing questions with options, images, and multi-language support.
+    Requires admin authentication.
+    """
+    questions_html_path = Path(__file__).parent / "static" / "admin" / "questions.html"
+    return FileResponse(
+        path=questions_html_path,
+        media_type="text/html",
+        status_code=200
+    )
 
 @app.get("/health")
 async def health_check():

@@ -6,9 +6,11 @@
 const AppInit = {
     async init() {
         try {
-            // Load current user email
+            // Load current user email using the API client
             const response = await fetch('/api/auth/me', {
-                credentials: 'include'
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+                }
             });
             
             if (response.ok) {
@@ -28,6 +30,7 @@ const AppInit = {
                 document.getElementById('current-user-email').textContent = 'Admin';
             }
         } catch (error) {
+            console.error('Error loading current user:', error);
             document.getElementById('current-user-email').textContent = 'Admin';
         }
         

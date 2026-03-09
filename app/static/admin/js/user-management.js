@@ -17,7 +17,7 @@ const UserManagement = {
                            state.adminFilter === 'true' ? true :
                            state.adminFilter === 'false' ? false : null;
             
-            const response = await ApiClient.getUsers(
+            const response = await apiClient.getUsers(
                 state.currentPage * state.pageSize,
                 state.pageSize,
                 state.searchQuery,
@@ -25,8 +25,13 @@ const UserManagement = {
                 isAdmin
             );
             
-            state.users = response.users;
-            state.totalUsers = response.total;
+            // Ensure response has the expected structure
+            if (!response || typeof response !== 'object') {
+                throw new Error('Invalid response format from server');
+            }
+            
+            state.users = response.users || [];
+            state.totalUsers = response.total || 0;
             
             this.updateFilterDisplay();
             
@@ -38,6 +43,7 @@ const UserManagement = {
                 UIUtils.showTable();
             }
         } catch (error) {
+            console.error('Error loading users:', error);
             UIUtils.showError(UIUtils.parseError(error));
         }
     },
@@ -138,7 +144,7 @@ const UserManagement = {
     // Create user
     async createUser(email, password, isVerified, isAdmin) {
         try {
-            await ApiClient.createUser(email, password, isVerified, isAdmin);
+            await apiClient.createUser(email, password, isVerified, isAdmin);
             UIUtils.closeModal('create-user-modal');
             UIUtils.showToast('User created successfully', 'success');
             state.resetPagination();
@@ -151,7 +157,7 @@ const UserManagement = {
     // Update user
     async updateUser(userId, updates) {
         try {
-            await ApiClient.updateUser(userId, updates);
+            await apiClient.updateUser(userId, updates);
             UIUtils.closeModal('edit-user-modal');
             UIUtils.showToast('User updated successfully', 'success');
             await this.loadUsers();
@@ -163,7 +169,7 @@ const UserManagement = {
     // Delete user
     async deleteUser(userId) {
         try {
-            await ApiClient.deleteUser(userId);
+            await apiClient.deleteUser(userId);
             UIUtils.closeModal('delete-user-modal');
             UIUtils.showToast('User deleted successfully', 'success');
             state.deleteUserId = null;
@@ -176,7 +182,7 @@ const UserManagement = {
     // Toggle verification
     async toggleVerification(userId) {
         try {
-            await ApiClient.toggleVerification(userId);
+            await apiClient.toggleVerification(userId);
             UIUtils.showToast('Verification status updated', 'success');
             await this.loadUsers();
         } catch (error) {

@@ -383,7 +383,7 @@ class AdminService:
             raise AuthorizationError("Cannot delete your own account")
         
         # Delete user
-        await self.user_repo.delete(user)
+        await self.user_repo.delete(user_id)
     
     async def toggle_verification(self, user_id: int) -> User:
         """Toggle user's verification status.

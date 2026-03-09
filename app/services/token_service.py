@@ -5,7 +5,7 @@ This module handles creation and validation of JWT tokens for authentication,
 including access tokens, refresh tokens, and email verification tokens.
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Dict
 
 from jose import JWTError, jwt
@@ -57,13 +57,13 @@ class TokenService:
         if expires_delta is None:
             expires_delta = timedelta(minutes=settings.access_token_expire_minutes)
         
-        expire = datetime.utcnow() + expires_delta
+        expire = datetime.now(timezone.utc) + expires_delta
         
         payload = {
             "sub": str(user_id),
             "type": "access",
             "exp": expire,
-            "iat": datetime.utcnow()
+            "iat": datetime.now(timezone.utc)
         }
         
         encoded_jwt = jwt.encode(payload, self.secret_key, algorithm=self.algorithm)
@@ -97,13 +97,13 @@ class TokenService:
         if expires_delta is None:
             expires_delta = timedelta(days=settings.refresh_token_expire_days)
         
-        expire = datetime.utcnow() + expires_delta
+        expire = datetime.now(timezone.utc) + expires_delta
         
         payload = {
             "sub": str(user_id),
             "type": "refresh",
             "exp": expire,
-            "iat": datetime.utcnow()
+            "iat": datetime.now(timezone.utc)
         }
         
         encoded_jwt = jwt.encode(payload, self.secret_key, algorithm=self.algorithm)
@@ -137,13 +137,13 @@ class TokenService:
         if expires_delta is None:
             expires_delta = timedelta(hours=settings.verification_token_expire_hours)
         
-        expire = datetime.utcnow() + expires_delta
+        expire = datetime.now(timezone.utc) + expires_delta
         
         payload = {
             "sub": str(user_id),
             "type": "verification",
             "exp": expire,
-            "iat": datetime.utcnow()
+            "iat": datetime.now(timezone.utc)
         }
         
         encoded_jwt = jwt.encode(payload, self.secret_key, algorithm=self.algorithm)

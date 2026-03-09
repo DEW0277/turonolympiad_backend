@@ -79,14 +79,39 @@ const UIUtils = {
 
     // Error Parsing
     parseError(error) {
-        if (error.data && error.data.detail) {
-            if (typeof error.data.detail === 'string') {
-                return error.data.detail;
+        // Handle error object from API client
+        if (error && typeof error === 'object') {
+            // Check for message field
+            if (error.message) {
+                return error.message;
             }
-            if (Array.isArray(error.data.detail)) {
-                return error.data.detail.map(e => `${e.loc.join('.')}: ${e.msg}`).join(', ');
+            
+            // Check for data.detail field
+            if (error.data && error.data.detail) {
+                if (typeof error.data.detail === 'string') {
+                    return error.data.detail;
+                }
+                if (Array.isArray(error.data.detail)) {
+                    return error.data.detail.map(e => `${e.loc.join('.')}: ${e.msg}`).join(', ');
+                }
+            }
+            
+            // Check for data.message field
+            if (error.data && error.data.message) {
+                return error.data.message;
+            }
+            
+            // Check for statusText
+            if (error.statusText) {
+                return error.statusText;
             }
         }
+        
+        // Handle string errors
+        if (typeof error === 'string') {
+            return error;
+        }
+        
         return 'An error occurred';
     }
 };

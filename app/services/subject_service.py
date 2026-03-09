@@ -4,9 +4,10 @@ This module provides the SubjectService class for managing subject operations,
 including creation, retrieval, updates, and deletion with comprehensive validation.
 """
 
-from typing import Tuple, List
+from typing import Tuple, List, Optional
 from app.models.subject import Subject
 from app.repositories.subject_repository import SubjectRepository
+from app.services.translation_service import TranslationService
 from app.core.exceptions import (
     ResourceNotFoundError,
     ResourceConflictError,
@@ -21,53 +22,78 @@ class SubjectService:
     and deletion with comprehensive validation and error handling.
     """
     
-    def __init__(self, subject_repository: SubjectRepository):
+    def __init__(self, subject_repository: SubjectRepository, translation_service: TranslationService):
         """Initialize SubjectService with dependencies.
         
         Args:
             subject_repository: SubjectRepository instance for database operations
+            translation_service: TranslationService instance for multi-language handling
         """
         self.subject_repo = subject_repository
+        self.translation_service = translation_service
     
-    def _validate_name(self, name: str) -> None:
-        """Validate subject name.
-        
-        Args:
-            name: Subject name to validate
-            
-        Raises:
-            ValidationError: If name is invalid
-        """
-        if not name or not isinstance(name, str):
-            raise ValidationError("Subject name must be a non-empty string")
-        
-        if len(name) < 1 or len(name) > 100:
-            raise ValidationError("Subject name must be between 1 and 100 characters")
-        
-        if name.strip() != name:
-            raise ValidationError("Subject name cannot have leading or trailing whitespace")
-    
-    async def create_subject(self, name: str) -> Subject:
+    async def create_subject(
+        self,
+        name_en: Optional[str] = None,
+        name_uz: Optional[str] = None,
+        name_ru: Optional[str] = None,
+        name: Optional[str] = None
+    ) -> Subject:
         """Create a new subject.
         
         Args:
-            name: Subject name (1-100 characters, must be unique)
+            name_en: Subject name in English (optional if using legacy format)
+            name_uz: Subject name in Uzbek (optional if using legacy format)
+            name_ru: Subject name in Russian (optional if using legacy format)
+            name: Legacy subject name (optional, for backward compatibility)
             
         Returns:
             Created Subject instance
             
         Raises:
-            ValidationError: If name is invalid
+            ValidationError: If translations are invalid
             ResourceConflictError: If subject with same name already exists
         """
-        self._validate_name(name)
+        # Handle legacy input format
+        if name and not (name_en or name_uz or name_ru):
+            translations = self.translation_service.handle_legacy_input(name, "name")
+            name_en = translations["name_en"]
+            name_uz = translations["name_uz"]
+            name_ru = translations["name_ru"]
         
-        # Check for duplicate
-        existing = await self.subject_repo.get_by_name(name)
+        # Validate translations
+        self.translation_service.validate_translations(
+            name_en=name_en,
+            name_uz=name_uz,
+            name_ru=name_ru,
+            field_name="name"
+        )
+        
+        # Validate individual field lengths
+        for lang, value in [("en", name_en), ("uz", name_uz), ("ru", name_ru)]:
+            if len(value) < 1 or len(value) > 100:
+                raise ValidationError(f"Subject name_{lang} must be between 1 and 100 characters")
+            if value.strip() != value:
+                raise ValidationError(f"Subject name_{lang} cannot have leading or trailing whitespace")
+        
+        # Check for duplicate (check English name)
+        existing = await self.subject_repo.get_by_name(name_en)
         if existing:
-            raise ResourceConflictError(f"Subject with name '{name}' already exists")
+            raise ResourceConflictError(f"Subject with name '{name_en}' already exists")
         
-        return await self.subject_repo.create(name=name)
+        # Prepare legacy field
+        legacy_name = self.translation_service.prepare_legacy_field(
+            name_en=name_en,
+            name_uz=name_uz,
+            name_ru=name_ru
+        )
+        
+        return await self.subject_repo.create(
+            name_en=name_en,
+            name_uz=name_uz,
+            name_ru=name_ru,
+            name=legacy_name
+        )
     
     async def get_subject(self, subject_id: int) -> Subject:
         """Retrieve a subject by ID.
@@ -105,35 +131,78 @@ class SubjectService:
         """
         return await self.subject_repo.list(skip=skip, limit=limit, search=search)
     
-    async def update_subject(self, subject_id: int, name: str) -> Subject:
+    async def update_subject(
+        self,
+        subject_id: int,
+        name_en: Optional[str] = None,
+        name_uz: Optional[str] = None,
+        name_ru: Optional[str] = None,
+        name: Optional[str] = None
+    ) -> Subject:
         """Update a subject.
         
         Args:
             subject_id: Subject ID to update
-            name: New subject name
+            name_en: New subject name in English (optional if using legacy format)
+            name_uz: New subject name in Uzbek (optional if using legacy format)
+            name_ru: New subject name in Russian (optional if using legacy format)
+            name: Legacy subject name (optional, for backward compatibility)
             
         Returns:
             Updated Subject instance
             
         Raises:
-            ValidationError: If name is invalid
+            ValidationError: If translations are invalid
             ResourceNotFoundError: If subject not found
             ResourceConflictError: If new name already exists
         """
-        self._validate_name(name)
-        
         # Verify subject exists
         subject = await self.subject_repo.get_by_id(subject_id)
         if not subject:
             raise ResourceNotFoundError(f"Subject with id {subject_id} not found")
         
-        # Check for duplicate if name is different
-        if subject.name != name:
-            existing = await self.subject_repo.get_by_name(name)
-            if existing:
-                raise ResourceConflictError(f"Subject with name '{name}' already exists")
+        # Handle legacy input format
+        if name and not (name_en or name_uz or name_ru):
+            translations = self.translation_service.handle_legacy_input(name, "name")
+            name_en = translations["name_en"]
+            name_uz = translations["name_uz"]
+            name_ru = translations["name_ru"]
         
-        return await self.subject_repo.update(subject_id, name=name)
+        # Validate translations
+        self.translation_service.validate_translations(
+            name_en=name_en,
+            name_uz=name_uz,
+            name_ru=name_ru,
+            field_name="name"
+        )
+        
+        # Validate individual field lengths
+        for lang, value in [("en", name_en), ("uz", name_uz), ("ru", name_ru)]:
+            if len(value) < 1 or len(value) > 100:
+                raise ValidationError(f"Subject name_{lang} must be between 1 and 100 characters")
+            if value.strip() != value:
+                raise ValidationError(f"Subject name_{lang} cannot have leading or trailing whitespace")
+        
+        # Check for duplicate if English name is different
+        if subject.name_en != name_en:
+            existing = await self.subject_repo.get_by_name(name_en)
+            if existing:
+                raise ResourceConflictError(f"Subject with name '{name_en}' already exists")
+        
+        # Prepare legacy field
+        legacy_name = self.translation_service.prepare_legacy_field(
+            name_en=name_en,
+            name_uz=name_uz,
+            name_ru=name_ru
+        )
+        
+        return await self.subject_repo.update(
+            subject_id,
+            name_en=name_en,
+            name_uz=name_uz,
+            name_ru=name_ru,
+            name=legacy_name
+        )
     
     async def delete_subject(self, subject_id: int) -> None:
         """Delete a subject.

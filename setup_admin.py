@@ -20,7 +20,7 @@ from app.services.password_service import PasswordService
 
 async def create_admin_user():
     """Create an admin user in the database."""
-    admin_email = "saidjalolturakhujayev@gmail.com"
+    admin_email = "saidjalol@gmail.com"
     admin_password = "**_StarsInTheSky_**"
     
     try:
