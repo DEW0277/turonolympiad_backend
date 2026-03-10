@@ -232,32 +232,31 @@ class TestsPage {
             window.location.href = `/admin/tests/${data.row.id}/questions`;
         });
         
-        // Add event listeners for action buttons
-        this.table.on('render', () => {
-            // Add event listeners for edit buttons
-            document.querySelectorAll('.edit-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
+        // Use event delegation for action buttons to handle dynamically generated content
+        const tableContainer = document.getElementById('table-container');
+        if (tableContainer) {
+            // Event delegation for edit buttons
+            tableContainer.addEventListener('click', (e) => {
+                if (e.target.classList.contains('edit-btn')) {
                     e.stopPropagation(); // Prevent row click
-                    const testId = btn.getAttribute('data-id');
+                    const testId = e.target.getAttribute('data-id');
                     const test = this.tests.find(t => t.id == testId);
                     if (test) {
                         this.openEditModal(test);
                     }
-                });
-            });
-            
-            // Add event listeners for delete buttons
-            document.querySelectorAll('.delete-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
+                }
+                
+                // Event delegation for delete buttons
+                if (e.target.classList.contains('delete-btn')) {
                     e.stopPropagation(); // Prevent row click
-                    const testId = btn.getAttribute('data-id');
+                    const testId = e.target.getAttribute('data-id');
                     const test = this.tests.find(t => t.id == testId);
                     if (test) {
                         this.confirmDelete(test);
                     }
-                });
+                }
             });
-        });
+        }
     }
     
     /**

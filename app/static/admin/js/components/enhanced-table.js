@@ -251,6 +251,9 @@ class EnhancedTable {
         
         // Attach event listeners after rendering
         this.attachEventListeners();
+        
+        // Emit render event for external listeners
+        this.emit('render');
     }
     
     /**
