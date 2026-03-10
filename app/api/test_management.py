@@ -313,6 +313,31 @@ async def create_level(
 
 
 @router.get(
+    "/levels/{level_id}",
+    response_model=LevelResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def get_level_global(
+    level_id: int,
+    language: str = Query(None, description="Language code (en/uz/ru) for filtered response"),
+    current_user: User = Depends(get_current_admin_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Get a level by ID (global endpoint)."""
+    try:
+        level_repo = LevelRepository(db)
+        subject_repo = SubjectRepository(db)
+        translation_service = TranslationService()
+        service = LevelService(level_repo, subject_repo, translation_service)
+        level = await service.get_level(level_id)
+        return level
+    except ResourceNotFoundError as e:
+        raise HTTPException(status_code=404, detail=e.message)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get(
     "/subjects/{subject_id}/levels/{level_id}",
     response_model=LevelResponse,
     status_code=status.HTTP_200_OK,
@@ -497,7 +522,8 @@ async def create_test_global(
             end_date=request.end_date
         )
         await db.commit()
-        await db.refresh(test)
+        # Fetch the test again with relationships loaded to avoid DetachedInstanceError
+        test = await test_repo.get_by_id(test.id)
         return test
     except ValidationError as e:
         raise HTTPException(status_code=400, detail=e.message)
@@ -662,7 +688,8 @@ async def create_test(
             end_date=request.end_date
         )
         await db.commit()
-        await db.refresh(test)
+        # Fetch the test again with relationships loaded to avoid DetachedInstanceError
+        test = await test_repo.get_by_id(test.id)
         return test
     except ValidationError as e:
         raise HTTPException(status_code=400, detail=e.message)

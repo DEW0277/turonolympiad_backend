@@ -165,11 +165,10 @@ class QuestionsPage {
                         return '<span class="text-gray-400 text-xs">No images</span>';
                     }
                     
-                    const thumbnails = row.images.map(img => {
-                        return `<img src="/${img.image_path}" alt="Thumbnail" class="h-8 w-8 object-cover rounded border border-gray-300 cursor-pointer hover:opacity-75" onclick="window.questionsPageInstance.viewImage('/${img.image_path}')">`;
-                    }).join('');
+                    const firstImage = row.images[0];
+                    const thumbnail = `<img src="${firstImage.image_path}" alt="Thumbnail" class="h-8 w-8 object-cover rounded border border-gray-300 cursor-pointer hover:opacity-75" onclick="window.questionsPageInstance.viewImage('${firstImage.image_path}')">`;
                     
-                    return `<div class="flex space-x-1">${thumbnails}</div>`;
+                    return `<div class="flex space-x-1">${thumbnail}</div>`;
                 }
             },
             {
@@ -519,7 +518,8 @@ class QuestionsPage {
         // Store instance globally for onclick handlers
         window.imageUploadInstance = this.imageUpload;
         
-        // Initialize with 2 default options (A and B)
+        // Initialize with 3 default options (A, B, and C)
+        this.addOption();
         this.addOption();
         this.addOption();
         
@@ -562,6 +562,36 @@ class QuestionsPage {
             text_ru: question.text_ru || ''
         });
         
+        // Populate existing options
+        if (question.options && question.options.length > 0) {
+            // Clear default options
+            this.questionOptions = [];
+            
+            // Add existing options
+            question.options.forEach(opt => {
+                this.questionOptions.push({
+                    label: opt.label,
+                    form: null
+                });
+            });
+            
+            // Render options
+            this.renderOptions();
+            
+            // Populate option data
+            question.options.forEach(opt => {
+                const form = this.questionOptions.find(o => o.label === opt.label)?.form;
+                if (form) {
+                    const fieldName = `option_${opt.label}_text`;
+                    form.setData({
+                        [`${fieldName}_en`]: opt.text_en || '',
+                        [`${fieldName}_uz`]: opt.text_uz || '',
+                        [`${fieldName}_ru`]: opt.text_ru || ''
+                    });
+                }
+            });
+        }
+        
         // Set correct answer
         const correctAnswerSelect = document.getElementById('correct-answer-select');
         if (correctAnswerSelect && question.correct_answer) {
@@ -579,9 +609,6 @@ class QuestionsPage {
         
         // Store instance globally for onclick handlers
         window.imageUploadInstance = this.imageUpload;
-        
-        // Load question options
-        await this.loadQuestionOptions(question.id);
         
         // Clear errors
         this.clearFormErrors();
@@ -658,12 +685,19 @@ class QuestionsPage {
         this.renderOptions();
         
         // If option data is provided, populate the form
-        if (optionData && option.form) {
-            option.form.setData({
-                text_en: optionData.text_en || '',
-                text_uz: optionData.text_uz || '',
-                text_ru: optionData.text_ru || ''
-            });
+        if (optionData) {
+            // Wait for form to be rendered, then set data
+            setTimeout(() => {
+                const currentOption = this.questionOptions.find(opt => opt.label === label);
+                if (currentOption && currentOption.form) {
+                    const fieldName = `option_${label}_text`;
+                    currentOption.form.setData({
+                        [`${fieldName}_en`]: optionData.text_en || '',
+                        [`${fieldName}_uz`]: optionData.text_uz || '',
+                        [`${fieldName}_ru`]: optionData.text_ru || ''
+                    });
+                }
+            }, 100);
         }
         
         // Update add button state
@@ -734,12 +768,11 @@ class QuestionsPage {
             
             // Initialize multi-language form for this option
             option.form = new MultiLangForm(`option-form-${option.label}`, {
-                fieldName: `option_${option.label}`,
-                fieldType: 'textarea',
+                fieldName: `option_${option.label}_text`,
+                fieldType: 'input',
                 label: `Option ${option.label} Text`,
                 maxLength: 1000,
-                required: true,
-                rows: 2
+                required: true
             });
         });
     }
@@ -913,13 +946,16 @@ class QuestionsPage {
             // Add options as JSON
             const optionsData = this.questionOptions.map(opt => {
                 const optData = opt.form.getData();
+                console.log(`Option ${opt.label} raw data:`, optData);
+                const fieldName = `option_${opt.label}_text`;
                 return {
                     label: opt.label,
-                    text_en: optData[`option_${opt.label}_en`],
-                    text_uz: optData[`option_${opt.label}_uz`],
-                    text_ru: optData[`option_${opt.label}_ru`]
+                    text_en: optData[`${fieldName}_en`],
+                    text_uz: optData[`${fieldName}_uz`],
+                    text_ru: optData[`${fieldName}_ru`]
                 };
             });
+            console.log('Final options being sent:', optionsData);
             formData.append('options', JSON.stringify(optionsData));
             
             // Submit to API

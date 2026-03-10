@@ -527,30 +527,34 @@ class OptionInput(BaseModel):
     # Multi-language fields
     text_en: Optional[str] = Field(
         default=None,
-        min_length=1,
         max_length=500,
-        description="Option text in English (1-500 characters)"
+        description="Option text in English (max 500 characters)"
     )
     text_uz: Optional[str] = Field(
         default=None,
-        min_length=1,
         max_length=500,
-        description="Option text in Uzbek (1-500 characters)"
+        description="Option text in Uzbek (max 500 characters)"
     )
     text_ru: Optional[str] = Field(
         default=None,
-        min_length=1,
         max_length=500,
-        description="Option text in Russian (1-500 characters)"
+        description="Option text in Russian (max 500 characters)"
     )
     
     # Legacy field (deprecated, kept for backward compatibility)
     text: Optional[str] = Field(
         default=None,
-        min_length=1,
         max_length=500,
         description="Option text (legacy field, use text_en/text_uz/text_ru instead)"
     )
+    
+    @field_validator('text_en', 'text_uz', 'text_ru', 'text', mode='before')
+    @classmethod
+    def convert_empty_to_none(cls, v):
+        """Convert empty strings to None."""
+        if v == "":
+            return None
+        return v
     
     model_config = ConfigDict(
         json_schema_extra={
@@ -641,19 +645,34 @@ class QuestionCreate(BaseModel):
     @field_validator('options')
     @classmethod
     def validate_options(cls, v: List[OptionInput]) -> List[OptionInput]:
-        """Validate that options have unique labels and text."""
+        """Validate that options have unique labels and text in each language."""
         labels = set()
-        texts = set()
-        
+        texts_en = set()
+        texts_uz = set()
+        texts_ru = set()
+
         for option in v:
             if option.label in labels:
                 raise ValueError(f"Duplicate option label: {option.label}")
-            if option.text in texts:
-                raise ValueError("Duplicate option text")
             
+            # Only check for duplicates among non-None values
+            if option.text_en is not None:
+                if option.text_en in texts_en:
+                    raise ValueError("Duplicate option text in English")
+                texts_en.add(option.text_en)
+            
+            if option.text_uz is not None:
+                if option.text_uz in texts_uz:
+                    raise ValueError("Duplicate option text in Uzbek")
+                texts_uz.add(option.text_uz)
+            
+            if option.text_ru is not None:
+                if option.text_ru in texts_ru:
+                    raise ValueError("Duplicate option text in Russian")
+                texts_ru.add(option.text_ru)
+
             labels.add(option.label)
-            texts.add(option.text)
-        
+
         return v
     
     model_config = ConfigDict(
@@ -737,19 +756,34 @@ class QuestionUpdate(BaseModel):
     @field_validator('options')
     @classmethod
     def validate_options(cls, v: List[OptionInput]) -> List[OptionInput]:
-        """Validate that options have unique labels and text."""
+        """Validate that options have unique labels and text in each language."""
         labels = set()
-        texts = set()
-        
+        texts_en = set()
+        texts_uz = set()
+        texts_ru = set()
+
         for option in v:
             if option.label in labels:
                 raise ValueError(f"Duplicate option label: {option.label}")
-            if option.text in texts:
-                raise ValueError("Duplicate option text")
             
+            # Only check for duplicates among non-None values
+            if option.text_en is not None:
+                if option.text_en in texts_en:
+                    raise ValueError("Duplicate option text in English")
+                texts_en.add(option.text_en)
+            
+            if option.text_uz is not None:
+                if option.text_uz in texts_uz:
+                    raise ValueError("Duplicate option text in Uzbek")
+                texts_uz.add(option.text_uz)
+            
+            if option.text_ru is not None:
+                if option.text_ru in texts_ru:
+                    raise ValueError("Duplicate option text in Russian")
+                texts_ru.add(option.text_ru)
+
             labels.add(option.label)
-            texts.add(option.text)
-        
+
         return v
     
     model_config = ConfigDict(

@@ -47,7 +47,8 @@ class EnhancedTable {
             rowEdit: [],
             rowDelete: [],
             rowSelect: [],
-            sortChange: []
+            sortChange: [],
+            rowClick: []
         };
         
         this.render();
@@ -406,7 +407,7 @@ class EnhancedTable {
             ` : '';
             
             return `
-                <tr class="${rowClasses}">
+                <tr class="${rowClasses}" data-row-id="${rowId}">
                     ${selectionCell}
                     ${dataCells}
                     ${actionsCell}
@@ -491,6 +492,35 @@ class EnhancedTable {
                 }
             });
         });
+        
+        // Row click handling for navigation
+        if (this.options.clickableRows) {
+            const tableRows = document.querySelectorAll('tbody tr');
+            console.log('Setting up row click handlers for', tableRows.length, 'rows');
+            tableRows.forEach(row => {
+                row.addEventListener('click', (e) => {
+                    console.log('Row clicked, target:', e.target.tagName);
+                    // Don't trigger if clicking on buttons, checkboxes, or action elements
+                    if (e.target.closest('[data-action]') || 
+                        e.target.closest('input[type="checkbox"]') ||
+                        e.target.closest('button')) {
+                        console.log('Ignoring click on action element');
+                        return;
+                    }
+                    
+                    // Get the row ID from the data attribute
+                    const rowId = parseInt(row.getAttribute('data-row-id'));
+                    console.log('Row ID:', rowId);
+                    const rowData = this.data.find(r => r[this.options.idField] === rowId);
+                    console.log('Row data found:', rowData);
+                    
+                    if (rowData) {
+                        console.log('Emitting rowClick event');
+                        this.emit('rowClick', { id: rowId, row: rowData });
+                    }
+                });
+            });
+        }
     }
     
     /**

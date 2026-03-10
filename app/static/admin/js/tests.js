@@ -118,146 +118,169 @@ class TestsPage {
      * Initialize enhanced table
      */
     initTable() {
-        const columns = [
-            {
-                key: 'id',
-                label: 'ID',
-                sortable: true
-            },
-            {
-                key: 'name',
-                label: 'Name',
-                sortable: true,
-                render: (value, row) => {
-                    // Display name in current language (default to English)
-                    const lang = 'en';
-                    return row[`name_${lang}`] || row.name_en || row.name || '-';
-                }
-            },
-            {
-                key: 'level',
-                label: 'Level',
-                sortable: false,
-                render: (value, row) => {
-                    // Display level name in current language (default to English)
-                    if (!row.level) return '-';
-                    const lang = 'en';
-                    return row.level[`name_${lang}`] || row.level.name_en || row.level.name || '-';
-                }
-            },
-            {
-                key: 'subject',
-                label: 'Subject',
-                sortable: false,
-                render: (value, row) => {
-                    // Display subject name directly from test.level.subject
-                    if (!row.level || !row.level.subject) return '-';
-                    const lang = 'en';
-                    return row.level.subject[`name_${lang}`] || row.level.subject.name_en || row.level.subject.name || '-';
-                }
-            },
-            {
-                key: 'price',
-                label: 'Price',
-                sortable: true,
-                render: (value) => {
-                    // Display "Free" for 0.00, otherwise format with currency
-                    if (value === 0 || value === '0.00' || value === 0.00) {
-                        return '<span class="text-green-600 font-medium">Free</span>';
+            const columns = [
+                {
+                    key: 'id',
+                    label: 'ID',
+                    sortable: true
+                },
+                {
+                    key: 'name',
+                    label: 'Name',
+                    sortable: true,
+                    render: (value, row) => {
+                        // Display name in current language (default to English)
+                        const lang = 'en';
+                        return row[`name_${lang}`] || row.name_en || row.name || '-';
                     }
-                    const price = typeof value === 'string' ? parseFloat(value) : value;
-                    return `$${price.toFixed(2)}`;
-                }
-            },
-            {
-                key: 'start_date',
-                label: 'Start Date',
-                sortable: true,
-                render: (value) => {
-                    if (!value) return '-';
-                    const date = new Date(value);
-                    return date.toLocaleDateString();
-                }
-            },
-            {
-                key: 'end_date',
-                label: 'End Date',
-                sortable: true,
-                render: (value) => {
-                    if (!value) return '-';
-                    const date = new Date(value);
-                    return date.toLocaleDateString();
-                }
-            },
-            {
-                key: 'created_at',
-                label: 'Created',
-                sortable: true,
-                render: (value) => {
-                    if (!value) return '-';
-                    const date = new Date(value);
-                    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
-                }
-            },
-            {
-                key: 'actions',
-                label: 'Actions',
-                sortable: false,
-                render: (value, row) => {
-                    return `
-                        <div class="flex space-x-2">
-                            <button class="edit-btn text-blue-600 hover:text-blue-800 text-sm font-medium" data-id="${row.id}">
-                                Edit
-                            </button>
-                            <button class="delete-btn text-red-600 hover:text-red-800 text-sm font-medium" data-id="${row.id}">
-                                Delete
-                            </button>
-                        </div>
-                    `;
-                }
-            }
-        ];
-        
-        this.table = new EnhancedTable('table-container', columns, {
-            selectable: false, // CRITICAL: No bulk selection as per instructions
-            actions: false, // We're handling actions manually in the Actions column
-            emptyMessage: 'No tests found',
-            idField: 'id',
-            clickableRows: true // Enable clickable rows for navigation
-        });
-        
-        // Listen for table events
-        this.table.on('rowClick', (data) => {
-            // Navigate to test detail page with questions
-            window.location.href = `/admin/tests/${data.row.id}/questions`;
-        });
-        
-        // Use event delegation for action buttons to handle dynamically generated content
-        const tableContainer = document.getElementById('table-container');
-        if (tableContainer) {
-            // Event delegation for edit buttons
-            tableContainer.addEventListener('click', (e) => {
-                if (e.target.classList.contains('edit-btn')) {
-                    e.stopPropagation(); // Prevent row click
-                    const testId = e.target.getAttribute('data-id');
-                    const test = this.tests.find(t => t.id == testId);
-                    if (test) {
-                        this.openEditModal(test);
+                },
+                {
+                    key: 'level',
+                    label: 'Level',
+                    sortable: false,
+                    render: (value, row) => {
+                        // Display level name in current language (default to English)
+                        if (!row.level) return '-';
+                        const lang = 'en';
+                        return row.level[`name_${lang}`] || row.level.name_en || row.level.name || '-';
+                    }
+                },
+                {
+                    key: 'subject',
+                    label: 'Subject',
+                    sortable: false,
+                    render: (value, row) => {
+                        // Display subject name directly from test.level.subject
+                        if (!row.level || !row.level.subject) return '-';
+                        const lang = 'en';
+                        return row.level.subject[`name_${lang}`] || row.level.subject.name_en || row.level.subject.name || '-';
+                    }
+                },
+                {
+                    key: 'price',
+                    label: 'Price',
+                    sortable: true,
+                    render: (value) => {
+                        // Display "Free" for 0.00, otherwise format with currency
+                        if (value === 0 || value === '0.00' || value === 0.00) {
+                            return '<span class="text-green-600 font-medium">Free</span>';
+                        }
+                        const price = typeof value === 'string' ? parseFloat(value) : value;
+                        return `${price.toFixed(2)}`;
+                    }
+                },
+                {
+                    key: 'start_date',
+                    label: 'Start Date',
+                    sortable: true,
+                    render: (value) => {
+                        if (!value) return '-';
+                        const date = new Date(value);
+                        return date.toLocaleDateString();
+                    }
+                },
+                {
+                    key: 'end_date',
+                    label: 'End Date',
+                    sortable: true,
+                    render: (value) => {
+                        if (!value) return '-';
+                        const date = new Date(value);
+                        return date.toLocaleDateString();
+                    }
+                },
+                {
+                    key: 'created_at',
+                    label: 'Created',
+                    sortable: true,
+                    render: (value) => {
+                        if (!value) return '-';
+                        const date = new Date(value);
+                        return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+                    }
+                },
+                {
+                    key: 'actions',
+                    label: 'Actions',
+                    sortable: false,
+                    render: (value, row) => {
+                        return `
+                            <div class="flex space-x-2">
+                                <button class="view-btn text-green-600 hover:text-green-800 text-sm font-medium" data-id="${row.id}">
+                                    View Questions
+                                </button>
+                                <button class="edit-btn text-blue-600 hover:text-blue-800 text-sm font-medium" data-id="${row.id}">
+                                    Edit
+                                </button>
+                                <button class="delete-btn text-red-600 hover:text-red-800 text-sm font-medium" data-id="${row.id}">
+                                    Delete
+                                </button>
+                            </div>
+                        `;
                     }
                 }
-                
-                // Event delegation for delete buttons
-                if (e.target.classList.contains('delete-btn')) {
-                    e.stopPropagation(); // Prevent row click
-                    const testId = e.target.getAttribute('data-id');
-                    const test = this.tests.find(t => t.id == testId);
-                    if (test) {
-                        this.confirmDelete(test);
-                    }
-                }
+            ];
+
+            this.table = new EnhancedTable('table-container', columns, {
+                selectable: false, // CRITICAL: No bulk selection as per instructions
+                actions: false, // We're handling actions manually in the Actions column
+                emptyMessage: 'No tests found',
+                idField: 'id',
+                clickableRows: true // Enable clickable rows for navigation
             });
+
+            const tableContainer = document.getElementById('table-container');
+            if (tableContainer) {
+                // Listen for table render event to attach row click handlers
+                this.table.on('render', () => {
+                    const tableRows = tableContainer.querySelectorAll('tbody tr');
+                    tableRows.forEach(row => {
+                        row.style.cursor = 'pointer';
+                        row.addEventListener('click', (e) => {
+                            // Don't navigate if clicking on buttons or action elements
+                            if (e.target.closest('[data-action]') || 
+                                e.target.closest('button') ||
+                                e.target.closest('input')) {
+                                return;
+                            }
+
+                            const rowId = row.getAttribute('data-row-id');
+                            if (rowId) {
+                                window.location.href = `/admin/questions?test_id=${rowId}`;
+                            }
+                        });
+                    });
+                });
+
+                // Event delegation for action buttons to handle dynamically generated content
+                tableContainer.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('view-btn')) {
+                        e.stopPropagation(); // Prevent row click
+                        const testId = e.target.getAttribute('data-id');
+                        window.location.href = `/admin/questions?test_id=${testId}`;
+                    }
+
+                    if (e.target.classList.contains('edit-btn')) {
+                        e.stopPropagation(); // Prevent row click
+                        const testId = e.target.getAttribute('data-id');
+                        const test = this.tests.find(t => t.id == testId);
+                        if (test) {
+                            this.openEditModal(test);
+                        }
+                    }
+
+                    // Event delegation for delete buttons
+                    if (e.target.classList.contains('delete-btn')) {
+                        e.stopPropagation(); // Prevent row click
+                        const testId = e.target.getAttribute('data-id');
+                        const test = this.tests.find(t => t.id == testId);
+                        if (test) {
+                            this.confirmDelete(test);
+                        }
+                    }
+                });
+            }
         }
-    }
     
     /**
      * Attach event listeners

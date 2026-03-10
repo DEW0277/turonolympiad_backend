@@ -129,13 +129,19 @@ class QuestionService:
                     text_key = f'text_{lang}'
                     if text_key in option:
                         text = option[text_key]
-                        if not isinstance(text, str) or not text:
-                            raise ValidationError(f"Option {i} {text_key} must be a non-empty string")
-                        if len(text) > 500:
-                            raise ValidationError(f"Option {i} {text_key} must not exceed 500 characters")
+                        # Treat empty strings as None
+                        if text == "":
+                            text = None
+                            option[text_key] = None
+                        
+                        if text is not None:
+                            if not isinstance(text, str):
+                                raise ValidationError(f"Option {i} {text_key} must be a string")
+                            if len(text) > 500:
+                                raise ValidationError(f"Option {i} {text_key} must not exceed 500 characters")
                 
-                # Check for duplicate English text
-                if 'text_en' in option:
+                # Check for duplicate English text (only among non-empty values)
+                if 'text_en' in option and option['text_en']:
                     text_en = option['text_en']
                     if text_en in seen_texts_en:
                         raise ValidationError("Duplicate option text")
