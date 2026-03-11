@@ -512,3 +512,31 @@ async def refresh_token(
     except (InvalidTokenError, ExpiredTokenError) as e:
         message = translations.get("invalid_token", language)
         raise AuthenticationError(message)
+
+
+@router.get(
+    "/me",
+    response_model=UserResponse,
+    status_code=status.HTTP_200_OK,
+    responses={
+        200: {
+            "description": "Current user information",
+        },
+        401: {
+            "description": "Not authenticated",
+        },
+    },
+)
+async def get_current_user_info(
+    current_user: Annotated[User, Depends(get_current_user)] = None,
+) -> UserResponse:
+    """
+    Get current authenticated user information.
+    
+    Returns the current user's details including email, verification status, and admin status.
+    
+    **Requirements:**
+    - User must be authenticated
+    - Returns user email, is_verified, is_admin, and created_at
+    """
+    return UserResponse.model_validate(current_user)

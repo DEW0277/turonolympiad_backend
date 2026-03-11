@@ -86,11 +86,13 @@ class UserResponse(BaseModel):
         id: Unique user identifier
         email: User's email address
         is_verified: Whether the user's email has been verified
+        is_admin: Whether the user is an admin
         created_at: Timestamp when the user account was created
     """
     id: int
     email: str
     is_verified: bool
+    is_admin: bool
     created_at: datetime
     
     model_config = ConfigDict(
@@ -100,6 +102,7 @@ class UserResponse(BaseModel):
                 "id": 1,
                 "email": "user@example.com",
                 "is_verified": True,
+                "is_admin": True,
                 "created_at": "2024-01-15T10:30:00"
             }
         }
@@ -125,6 +128,7 @@ class AuthResponse(BaseModel):
                     "id": 1,
                     "email": "user@example.com",
                     "is_verified": True,
+                    "is_admin": True,
                     "created_at": "2024-01-15T10:30:00"
                 }
             }

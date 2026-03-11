@@ -129,3 +129,65 @@ def get_language(
         - 7.1: Detect user language from Accept-Language header
     """
     return detect_language(accept_language)
+
+
+async def get_current_admin_user(
+    current_user: Annotated[User, Depends(get_current_user)] = None,
+    db: AsyncSession = Depends(get_db)
+) -> User:
+    """
+    Dependency for verifying admin role on protected endpoints.
+    
+    This dependency verifies that the current authenticated user has admin privileges
+    by checking the is_admin flag from the database. It uses the existing get_current_user
+    dependency to ensure the user is authenticated, then performs an additional
+    authorization check for admin role.
+    
+    The admin status is verified from the current database state (not from a cached
+    token), ensuring that admin privileges are always current and can be revoked
+    immediately by updating the database.
+    
+    Args:
+        current_user: Authenticated user from get_current_user dependency
+        db: Database session from dependency injection
+    
+    Returns:
+        The authenticated User object if admin check passes
+    
+    Raises:
+        AuthorizationError: If user is not an admin (is_admin != True)
+    
+    Example:
+        ```python
+        @router.get("/api/admin/users")
+        async def list_users(
+            current_admin: User = Depends(get_current_admin_user)
+        ):
+            return {"admin_id": current_admin.id}
+        ```
+    
+    Preconditions:
+        - current_user must be authenticated (valid session cookie)
+        - current_user must exist in database
+        - Database connection must be active
+    
+    Postconditions:
+        - Returns current_user if is_admin == True
+        - Raises AuthorizationError if is_admin == False
+        - Does not modify user state or session
+    
+    Requirements:
+        - 9.1: Non-admin users cannot access admin endpoints
+        - 9.2: Unauthenticated users cannot access admin endpoints
+        - 9.3: Admin status verified from database (not token)
+        - 9.4: Authorization error message "Admin access required"
+        - 9.5: Proceed with operation if authorization succeeds
+        - 21.1: Admin status verified from database
+    """
+    from app.core.exceptions import AuthorizationError
+    
+    # Verify user has admin privileges
+    if not current_user.is_admin:
+        raise AuthorizationError("Admin access required")
+    
+    return current_user
