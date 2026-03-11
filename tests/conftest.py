@@ -20,6 +20,17 @@ def pytest_configure(config):
     )
 
 
+# Configure asyncio mode for pytest-asyncio
+pytest_plugins = ("pytest_asyncio",)
+
+
+def pytest_collection_modifyitems(config, items):
+    """Add asyncio marker to async tests."""
+    for item in items:
+        if asyncio.iscoroutinefunction(item.function):
+            item.add_marker(pytest.mark.asyncio)
+
+
 # Test database URL
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
 
@@ -85,7 +96,7 @@ async def admin_user(test_db):
         password_service = PasswordService()
         user = User(
             email="admin@example.com",
-            hashed_password=password_service.hash_password("adminpass123"),
+            hashed_password=password_service.hash_password("admin123"),
             is_verified=True,
             is_admin=True
         )
@@ -102,7 +113,7 @@ async def regular_user(test_db):
         password_service = PasswordService()
         user = User(
             email="user@example.com",
-            hashed_password=password_service.hash_password("userpass123"),
+            hashed_password=password_service.hash_password("user123"),
             is_verified=True,
             is_admin=False
         )

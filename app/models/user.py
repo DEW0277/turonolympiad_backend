@@ -5,7 +5,7 @@ This module defines the User SQLAlchemy model for storing user authentication da
 
 from datetime import datetime, timezone
 from sqlalchemy import String, Boolean, DateTime, Index
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database import Base
 
 
@@ -40,6 +40,20 @@ class User(Base):
         nullable=False
     )
     
+    # Relationships
+    tickets: Mapped[list["Ticket"]] = relationship(
+        "Ticket",
+        back_populates="user",
+        cascade="all, delete-orphan",
+        lazy="select"
+    )
+    test_solutions: Mapped[list["TestSolution"]] = relationship(
+        "TestSolution",
+        back_populates="user",
+        cascade="all, delete-orphan",
+        lazy="select"
+    )
+    
     def __repr__(self) -> str:
         """String representation of User."""
         return f"<User(id={self.id}, email={self.email}, is_admin={self.is_admin})>"
@@ -52,3 +66,8 @@ __table_args__ = (
     Index('idx_users_admin', 'is_admin'),
     Index('idx_users_verified_created', 'is_verified', 'created_at'),
 )
+
+
+# Import Ticket and TestSolution here to avoid circular imports
+from app.models.ticket import Ticket  # noqa: E402, F401
+from app.models.test_solution import TestSolution  # noqa: E402, F401

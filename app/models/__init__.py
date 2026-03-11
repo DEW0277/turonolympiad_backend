@@ -8,5 +8,7 @@ from app.models.test import Test
 from app.models.question import Question
 from app.models.question_option import QuestionOption
 from app.models.question_image import QuestionImage
+from app.models.ticket import Ticket
+from app.models.test_solution import TestSolution
 
-__all__ = ["User", "AuditLog", "Subject", "Level", "Test", "Question", "QuestionOption", "QuestionImage"]
+__all__ = ["User", "AuditLog", "Subject", "Level", "Test", "Question", "QuestionOption", "QuestionImage", "Ticket", "TestSolution"]

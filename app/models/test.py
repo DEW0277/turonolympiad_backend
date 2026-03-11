@@ -72,6 +72,18 @@ class Test(Base):
         cascade="all, delete-orphan",
         lazy="select"
     )
+    tickets: Mapped[list["Ticket"]] = relationship(
+        "Ticket",
+        back_populates="test",
+        cascade="all, delete-orphan",
+        lazy="select"
+    )
+    test_solutions: Mapped[list["TestSolution"]] = relationship(
+        "TestSolution",
+        back_populates="test",
+        cascade="all, delete-orphan",
+        lazy="select"
+    )
     
     # Constraints
     __table_args__ = (
@@ -91,6 +103,8 @@ class Test(Base):
         return f"<Test(id={getattr(self, 'id', None)}, level_id={getattr(self, 'level_id', None)}, name_en={getattr(self, 'name_en', None)})>"
 
 
-# Import Level and Question here to avoid circular imports
+# Import Level, Question, Ticket, and TestSolution here to avoid circular imports
 from app.models.level import Level  # noqa: E402, F401
 from app.models.question import Question  # noqa: E402, F401
+from app.models.ticket import Ticket  # noqa: E402, F401
+from app.models.test_solution import TestSolution  # noqa: E402, F401
